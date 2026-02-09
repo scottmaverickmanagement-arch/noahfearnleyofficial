@@ -3,7 +3,15 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "@/components/layout/Layout";
 import Index from "./pages/Index";
+import About from "./pages/About";
+import Filmography from "./pages/Filmography";
+import News from "./pages/News";
+import Gallery from "./pages/Gallery";
+import Events from "./pages/Events";
+import FanClub from "./pages/FanClub";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -14,11 +22,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/filmography" element={<Filmography />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/fan-club" element={<FanClub />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
