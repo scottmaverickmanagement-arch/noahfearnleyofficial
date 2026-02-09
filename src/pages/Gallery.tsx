@@ -4,18 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ScrollReveal from "@/components/ScrollReveal";
 
+import gallery1 from "@/assets/gallery/gallery-1.jpg";
+import gallery2 from "@/assets/gallery/gallery-2.jpg";
+import gallery3 from "@/assets/gallery/gallery-3.jpg";
+import gallery4 from "@/assets/gallery/gallery-4.jpg";
+import gallery5 from "@/assets/gallery/gallery-5.jpg";
+import gallery6 from "@/assets/gallery/gallery-6.jpg";
+
 const categories = ["All", "On Set", "Personal", "Events"] as const;
 
 const images = [
-  { id: 1, category: "On Set", label: "On the set of Mercy" },
-  { id: 2, category: "On Set", label: "Vertical drama filming" },
-  { id: 3, category: "Personal", label: "1968 Mustang restoration" },
-  { id: 4, category: "Events", label: "LA Film Festival" },
-  { id: 5, category: "On Set", label: "Behind the scenes – Love Story" },
-  { id: 6, category: "Personal", label: "Family moments" },
-  { id: 7, category: "Events", label: "Fan meet-and-greet" },
-  { id: 8, category: "On Set", label: "Lifetime film set" },
-  { id: 9, category: "Personal", label: "Daily workout" },
+  { id: 1, category: "On Set", label: "Modeling", src: gallery1 },
+  { id: 2, category: "On Set", label: "Studio Session", src: gallery2 },
+  { id: 3, category: "Personal", label: "Lifestyle", src: gallery3 },
+  { id: 4, category: "Events", label: "Headshot", src: gallery4 },
+  { id: 5, category: "On Set", label: "Outdoor Shoot", src: gallery5 },
+  { id: 6, category: "Personal", label: "Casual", src: gallery6 },
 ];
 
 const gradients = [
@@ -66,15 +70,17 @@ const Gallery = () => {
               <ScrollReveal key={img.id} delay={i * 0.05}>
                 <button
                   onClick={() => setSelected(img)}
-                  className="group relative aspect-square w-full bg-gradient-to-br rounded-lg overflow-hidden cursor-pointer border border-border hover:border-primary/30 transition-colors"
-                  style={{}}
+                  className="group relative aspect-square w-full bg-muted rounded-lg overflow-hidden cursor-pointer border border-border hover:border-primary/30 transition-colors"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradients[i % gradients.length]}`} />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Camera className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                    <span className="text-muted-foreground text-xs">{img.label}</span>
+                  <img
+                    src={img.src}
+                    alt={img.label}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">
+                    <Camera className="h-8 w-8 text-white/80 mb-2" />
+                    <span className="text-white text-xs font-medium tracking-wide">{img.label}</span>
                   </div>
-                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors" />
                 </button>
               </ScrollReveal>
             ))}
@@ -85,12 +91,12 @@ const Gallery = () => {
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent className="max-w-3xl bg-card border-border">
           {selected && (
-            <div className="aspect-[4/3] bg-gradient-to-br from-secondary to-muted rounded flex items-center justify-center">
-              <div className="text-center">
-                <Camera className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="text-muted-foreground">{selected.label}</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">{selected.category}</p>
-              </div>
+            <div className="aspect-[4/3] bg-background rounded overflow-hidden flex items-center justify-center max-h-[80vh]">
+              <img
+                src={selected.src}
+                alt={selected.label}
+                className="w-full h-full object-contain"
+              />
             </div>
           )}
         </DialogContent>

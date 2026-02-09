@@ -3,7 +3,7 @@ import { ArrowRight, Play, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from "@/components/ScrollReveal";
-import heroImage from "@/assets/hero.jpg";
+import heroImage from "@/assets/noah-real.jpg";
 
 const newsPreview = [
   { date: "Jan 15, 2026", title: "Noah Joins Cast of 'Mercy' with Chris Pratt", excerpt: "Exciting news as Noah lands a role alongside Chris Pratt in the highly anticipated thriller 'Mercy,' set for theatrical release in 2026." },
