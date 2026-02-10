@@ -48,9 +48,14 @@ const Footer = () => {
             <a href="#" className="text-muted-foreground hover:text-primary transition-colors text-xs">Terms of Service</a>
           </div>
           <div className="flex items-center gap-3">
-            {[Instagram, Facebook, Youtube, Twitter].map((Icon, i) => (
-              <a key={i} href="#" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                <Icon className="h-4 w-4" />
+            {[
+              { icon: Instagram, href: "https://www.instagram.com/noahfearnleyy/" },
+              { icon: Facebook, href: "#" },
+              { icon: Youtube, href: "#" },
+              { icon: Twitter, href: "#" },
+            ].map((social, i) => (
+              <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <social.icon className="h-4 w-4" />
               </a>
             ))}
           </div>

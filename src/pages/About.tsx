@@ -9,9 +9,23 @@ const milestones = [
   { year: "2025–26", title: "Hollywood Calling", description: "Cast in the theatrical film 'Mercy' alongside Chris Pratt, and as Michael Bergin in FX's 'Love Story.' The journey from vertical dramas to the big screen is complete." },
 ];
 
+import aboutVideo from "@/assets/about-background.mp4"; // Import the video
+
 const About = () => {
   return (
     <>
+      {/* Fixed Video Background */}
+      <div className="fixed inset-0 -z-50">
+        <video
+          src={aboutVideo}
+          className="w-full h-full object-cover opacity-60" // Reduced opacity slightly for better blend
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        <div className="absolute inset-0 bg-background/90" /> {/* Increased tint opacity for better readability */}
+      </div>
       {/* Hero */}
       <section className="py-24 md:py-32">
         <div className="container mx-auto px-4 text-center max-w-3xl">

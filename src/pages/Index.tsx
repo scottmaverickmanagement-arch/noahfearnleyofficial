@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Play, Film } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from "@/components/ScrollReveal";
-import heroImage from "@/assets/noah-real.jpg";
+import BackgroundSlideshow from "@/components/BackgroundSlideshow";
+import heroImage from "@/assets/hero-updated.jpg"; // User-specified hero image from GitHub
+
+import mercyPoster from "@/assets/posters/mercy-2026.jpg";
 
 const newsPreview = [
   { date: "Jan 15, 2026", title: "Noah Joins Cast of 'Mercy' with Chris Pratt", excerpt: "Exciting news as Noah lands a role alongside Chris Pratt in the highly anticipated thriller 'Mercy,' set for theatrical release in 2026." },
@@ -11,24 +14,29 @@ const newsPreview = [
   { date: "Nov 20, 2025", title: "Upcoming Fan Meet-and-Greet Events", excerpt: "Get ready for exclusive meet-and-greet events in Los Angeles and New York. Fan club members get priority access." },
 ];
 
-const dramaCards = [
-  "Escorting the Heiress",
-  "Fade Till the End",
-  "Virgin's Bucket List",
-  "Gold Hearts of Hot Rod County",
-  "Rivals Getting Married",
-  "AI Robot Chef",
+import verticalPlaceholder from "@/assets/posters/vertical-placeholder.jpg";
+
+const verticalDramasPreview = [
+  { title: "Oops! I Married My Enemy", image: verticalPlaceholder },
+  { title: "Forbidden Affair with My Husband", image: verticalPlaceholder },
+  { title: "Royal Heir Breaks My Heart", image: verticalPlaceholder },
+  { title: "All I Want Is You", image: verticalPlaceholder },
+  { title: "Love by Contract", image: verticalPlaceholder },
+  { title: "Escorting the Heiress", image: verticalPlaceholder },
 ];
 
 const Index = () => {
   return (
     <>
-      {/* Hero */}
+      {/* Fixed Hero Background */}
+      <div className="fixed inset-0 -z-50">
+        <img src={heroImage} alt="Noah Fearnley" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
+      </div>
+
+      {/* Hero Content */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img src={heroImage} alt="Noah Fearnley" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
-        </div>
+        {/* Removed local image background */}
         <div className="relative z-10 container mx-auto px-4 text-center">
           <ScrollReveal>
             <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4">Welcome to the Official Website of</p>
@@ -45,9 +53,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Intro */}
-      <section className="py-24">
-        <div className="container mx-auto px-4 max-w-3xl text-center">
+      {/* Intro (About) */}
+      <section className="py-24 relative overflow-hidden">
+        <BackgroundSlideshow className="opacity-40" overlayOpacity={0.8} />
+        <div className="container mx-auto px-4 max-w-3xl text-center relative z-10">
           <ScrollReveal>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               Noah Fearnley, the charismatic actor from Orange, Connecticut, is captivating audiences with his versatile
@@ -63,9 +72,14 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <ScrollReveal>
-              <Card className="bg-card border-border overflow-hidden group cursor-pointer hover:border-primary/30 transition-colors">
-                <div className="aspect-[16/9] bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
-                  <Film className="h-16 w-16 text-primary/40" />
+              <Card className="bg-card border-border overflow-hidden group cursor-pointer hover:border-primary/30 transition-colors h-full">
+                <div className="aspect-[2/3] md:aspect-[16/9] relative overflow-hidden">
+                  <img
+                    src={mercyPoster}
+                    alt="Mercy Movie Poster"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
                 </div>
                 <CardContent className="p-6">
                   <p className="text-primary text-xs uppercase tracking-[0.2em] mb-2">Coming 2026</p>
@@ -75,20 +89,32 @@ const Index = () => {
                     and the lengths one will go to protect what matters most.
                   </p>
                   <Button variant="outline" asChild>
-                    <Link to="/filmography">Learn More <ArrowRight className="ml-2 h-3 w-3" /></Link>
+                    <a href="https://www.imdb.com/title/tt31193158/" target="_blank" rel="noopener noreferrer">
+                      View on IMDB <ArrowRight className="ml-2 h-3 w-3" />
+                    </a>
                   </Button>
                 </CardContent>
               </Card>
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <Card className="bg-card border-border overflow-hidden hover:border-primary/30 transition-colors">
-                <div className="aspect-[16/9] bg-gradient-to-br from-muted to-secondary p-6 overflow-hidden">
-                  <div className="grid grid-cols-3 gap-2 h-full">
-                    {dramaCards.map((title) => (
-                      <div key={title} className="bg-background/50 rounded flex items-center justify-center p-2">
-                        <span className="text-[10px] text-muted-foreground text-center leading-tight">{title}</span>
-                      </div>
+              <Card className="bg-card border-border overflow-hidden hover:border-primary/30 transition-colors h-full">
+                <div className="aspect-[16/9] bg-gradient-to-br from-muted to-secondary p-6 overflow-hidden relative group">
+                  {/* Vertical Posters Grid */}
+                  <div className="grid grid-cols-3 gap-2 h-full opacity-60 group-hover:opacity-80 transition-opacity">
+                    {verticalDramasPreview.map((drama, i) => (
+                      <Link key={i} to="/filmography" className="block h-full">
+                        <div className="rounded overflow-hidden relative aspect-[3/4] hover:ring-2 hover:ring-primary/50 transition-all h-full">
+                          <img
+                            src={drama.image}
+                            alt={drama.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <span className="text-[6px] md:text-[8px] text-white/90 text-center px-1 font-medium leading-tight">{drama.title}</span>
+                          </div>
+                        </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -136,9 +162,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24">
-        <div className="container mx-auto px-4 text-center">
+      {/* CTA (Fan Club) */}
+      <section className="py-24 relative overflow-hidden">
+        <BackgroundSlideshow className="opacity-40" overlayOpacity={0.7} />
+        <div className="container mx-auto px-4 text-center relative z-10">
           <ScrollReveal>
             <h2 className="font-serif text-3xl md:text-5xl font-bold mb-6">Be Part of the Journey</h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">

@@ -10,7 +10,16 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder
+
+    // Construct mailto link
+    const subjectEncoded = encodeURIComponent(form.subject || "Contact Request");
+    const bodyEncoded = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`);
+
+    // Open email client
+    window.location.href = `mailto:management@noahfearnleyofficial.com?subject=${subjectEncoded}&body=${bodyEncoded}`;
+
+    // Optional: Reset form or show success message (simple alert or console for now as current UX is direct)
+    alert("Opening your email client to send the message.");
   };
 
   return (
@@ -54,9 +63,9 @@ const Contact = () => {
               <div className="space-y-8">
                 <div>
                   <h3 className="font-serif text-xl font-semibold mb-3">Management & Press</h3>
-                  <a href="mailto:management@noahfearnley.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                  <a href="mailto:management@noahfearnleyofficial.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
                     <Mail className="h-4 w-4" />
-                    management@noahfearnley.com
+                    management@noahfearnleyofficial.com
                   </a>
                 </div>
 
@@ -64,7 +73,7 @@ const Contact = () => {
                   <h3 className="font-serif text-xl font-semibold mb-3">Follow Noah</h3>
                   <div className="flex flex-col gap-3">
                     {[
-                      { icon: Instagram, label: "Instagram", href: "https://instagram.com" },
+                      { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/noahfearnleyy/" },
                       { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
                       { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
                       { icon: Twitter, label: "Twitter / X", href: "https://twitter.com" },

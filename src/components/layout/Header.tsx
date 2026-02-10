@@ -16,7 +16,7 @@ const navItems = [
 ];
 
 const socials = [
-  { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+  { icon: Instagram, href: "https://www.instagram.com/noahfearnleyy/", label: "Instagram" },
   { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
   { icon: Youtube, href: "https://youtube.com", label: "YouTube" },
   { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
@@ -35,9 +35,8 @@ const Header = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-background/95 backdrop-blur-sm border-b border-border" : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/95 backdrop-blur-sm border-b border-border" : "bg-transparent"
+        }`}
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-serif text-2xl font-bold tracking-wide text-foreground">
@@ -49,9 +48,8 @@ const Header = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`text-xs uppercase tracking-[0.2em] transition-colors hover:text-primary ${
-                location.pathname === item.path ? "text-primary" : "text-muted-foreground"
-              }`}
+              className={`text-xs uppercase tracking-[0.2em] transition-colors hover:text-primary ${location.pathname === item.path ? "text-primary" : "text-muted-foreground"
+                }`}
             >
               {item.label}
             </Link>
@@ -79,9 +77,8 @@ const Header = () => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setOpen(false)}
-                  className={`text-base uppercase tracking-[0.15em] transition-colors hover:text-primary ${
-                    location.pathname === item.path ? "text-primary" : "text-muted-foreground"
-                  }`}
+                  className={`text-base uppercase tracking-[0.15em] transition-colors hover:text-primary ${location.pathname === item.path ? "text-primary" : "text-muted-foreground"
+                    }`}
                 >
                   {item.label}
                 </Link>

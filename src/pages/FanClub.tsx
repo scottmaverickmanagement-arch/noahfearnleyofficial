@@ -13,16 +13,34 @@ const benefits = [
   { icon: Gift, title: "Auctions & Giveaways", desc: "Signed scripts, props from vertical dramas, modeling portfolio items, and football memorabilia." },
 ];
 
+import heroImage from "@/assets/hero-updated.jpg";
+
 const FanClub = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder — connect to backend later
+
+    // Construct mailto link
+    const subject = encodeURIComponent("Fan Club Registration Request");
+    const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nI would like to join the Noah Fearnley Fan Club. Please send me instructions.`);
+
+    // Open email client
+    window.location.href = `mailto:management@noahfearnleyofficial.com?subject=${subject}&body=${body}`;
+
+    // Show success state
+    setIsSubmitted(true);
   };
 
   return (
     <>
+      {/* Fixed Hero Background */}
+      <div className="fixed inset-0 -z-50">
+        <img src={heroImage} alt="Background" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
+      </div>
+
       <section className="py-24 md:py-32">
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <ScrollReveal>
@@ -61,50 +79,72 @@ const FanClub = () => {
         <div className="container mx-auto px-4 max-w-md">
           <ScrollReveal>
             <h2 className="font-serif text-3xl font-bold text-center mb-8">Sign Up</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="text-sm font-medium mb-1.5 block">Full Name</label>
-                <Input
-                  id="name"
-                  placeholder="Noah Fearnley"
-                  value={formData.name}
-                  onChange={(e) => setFormData((d) => ({ ...d, name: e.target.value }))}
-                  required
-                  className="bg-background"
-                />
+
+            {isSubmitted ? (
+              <div className="text-center p-8 bg-background border border-border rounded-lg shadow-sm">
+                <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ArrowRight className="w-8 h-8" />
+                </div>
+                <h3 className="font-serif text-xl font-bold mb-2">Request Sent!</h3>
+                <p className="text-muted-foreground mb-4">
+                  Your email app should have opened. Please send the email to complete your request.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Once sent, our management team will review your details and reply with official instructions and links to the fan club platform.
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-6"
+                  onClick={() => setIsSubmitted(false)}
+                >
+                  Return to Form
+                </Button>
               </div>
-              <div>
-                <label htmlFor="email" className="text-sm font-medium mb-1.5 block">Email</label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData((d) => ({ ...d, email: e.target.value }))}
-                  required
-                  className="bg-background"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="text-sm font-medium mb-1.5 block">Password</label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData((d) => ({ ...d, password: e.target.value }))}
-                  required
-                  minLength={8}
-                  className="bg-background"
-                />
-              </div>
-              <Button type="submit" className="w-full" size="lg">
-                Join the Fan Club <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <p className="text-muted-foreground text-xs text-center">
-                By joining, you agree to our Terms of Service and Privacy Policy.
-              </p>
-            </form>
+            ) : (
+              <>
+                <p className="text-center text-muted-foreground mb-8 text-sm leading-relaxed">
+                  To ensure the exclusivity and security of our community, joining is a two-step process.
+                  Fill out the form below to initiate an email to our management team.
+                  <br /><br />
+                  <span className="text-primary font-medium">What happens next?</span> You will receive a reply from
+                  <span className="font-mono text-xs mx-1 p-1 bg-primary/10 rounded">management@noahfearnleyofficial.com</span>
+                  with your unique access link and instructions.
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="text-sm font-medium mb-1.5 block">Full Name</label>
+                    <Input
+                      id="name"
+                      placeholder="Noah Fearnley"
+                      value={formData.name}
+                      onChange={(e) => setFormData((d) => ({ ...d, name: e.target.value }))}
+                      required
+                      className="bg-background"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="text-sm font-medium mb-1.5 block">Email</label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData((d) => ({ ...d, email: e.target.value }))}
+                      required
+                      className="bg-background"
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full" size="lg">
+                    Join the Fan Club <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <p className="text-muted-foreground text-xs text-center">
+                    By joining, you agree to our Terms of Service and Privacy Policy.
+                  </p>
+                </form>
+              </>
+            )}
           </ScrollReveal>
         </div>
       </section>
