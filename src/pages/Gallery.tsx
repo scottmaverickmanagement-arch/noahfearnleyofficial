@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 // Dynamically import all gallery images and videos
 const videoModules = import.meta.glob("@/assets/videos/*.mp4", { eager: true });
-const galleryVideos = Object.values(videoModules).map((mod: any) => mod.default);
+const galleryVideos = Object.values(videoModules).map((mod) => (mod as { default: string }).default);
 
 import BackgroundSlideshow from "@/components/BackgroundSlideshow";
 
@@ -66,7 +66,7 @@ const Gallery = () => {
                     Better to keep it simple and re-import here or export from component (complicated).
                     Let's re-import locally for now to avoid circular deps or complex state lifting.
                 */}
-                {Object.values(import.meta.glob("@/assets/gallery/*.jpg", { eager: true })).map((mod: any) => mod.default).map((src: string, i: number) => (
+                {Object.values(import.meta.glob("@/assets/gallery/*.jpg", { eager: true })).map((mod) => (mod as { default: string }).default).map((src: string, i: number) => (
                   <ScrollReveal key={i} delay={i % 3 * 0.05}>
                     <button
                       onClick={() => setSelectedImage(src)}

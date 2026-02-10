@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 // Dynamically import all gallery images
 const galleryModules = import.meta.glob("@/assets/gallery/*.jpg", { eager: true });
-const galleryImages = Object.values(galleryModules).map((mod: any) => mod.default);
+const galleryImages = Object.values(galleryModules).map((mod) => (mod as { default: string }).default);
 
 interface BackgroundSlideshowProps {
     className?: string;
