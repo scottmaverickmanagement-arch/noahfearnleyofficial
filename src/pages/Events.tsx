@@ -1,4 +1,5 @@
 import { CalendarDays, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -12,6 +13,8 @@ const events = [
 ];
 
 const Events = () => {
+  const navigate = useNavigate();
+
   return (
     <>
       <section className="py-24 md:py-32">
@@ -41,7 +44,12 @@ const Events = () => {
                   </div>
                   <p className="text-muted-foreground text-sm leading-relaxed mb-4">{event.description}</p>
                   {event.tickets && (
-                    <Button>Get Tickets</Button>
+                    <div className="flex flex-col items-start gap-3">
+                      <div className="text-xs text-primary font-medium tracking-wide">
+                        * Tickets available exclusively for Fan Club members
+                      </div>
+                      <Button onClick={() => navigate("/fan-club")}>Get Tickets</Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>

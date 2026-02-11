@@ -74,7 +74,7 @@ const Contact = () => {
                   <div className="flex flex-col gap-3">
                     {[
                       { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/noahfearnleyy/" },
-                      { icon: Facebook, label: "Facebook", href: "https://facebook.com" },
+                      { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/profile.php?id=61587444625116" },
                       { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
                       { icon: Twitter, label: "Twitter / X", href: "https://twitter.com" },
                     ].map((s) => (

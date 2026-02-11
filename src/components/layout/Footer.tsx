@@ -50,7 +50,7 @@ const Footer = () => {
           <div className="flex items-center gap-3">
             {[
               { icon: Instagram, href: "https://www.instagram.com/noahfearnleyy/" },
-              { icon: Facebook, href: "#" },
+              { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61587444625116" },
               { icon: Youtube, href: "#" },
               { icon: Twitter, href: "#" },
             ].map((social, i) => (
