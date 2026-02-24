@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Users, Ticket, Gift, Lock, ArrowRight } from "lucide-react";
+import { Star, Users, Ticket, Gift, Lock, ArrowRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -145,6 +145,29 @@ const FanClub = () => {
                 </form>
               </>
             )}
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Fan Mail */}
+      <section className="py-24 border-t border-border/50">
+        <div className="container mx-auto px-4 text-center max-w-2xl">
+          <ScrollReveal>
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Mail className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Fan Mail</h2>
+            <p className="text-muted-foreground text-lg mb-8">
+              Want to reach out to Noah directly? He loves hearing from his fans!
+              Send him a message and stay connected.
+            </p>
+            <Button
+              size="lg"
+              className="px-8 shadow-lg hover:shadow-primary/20 transition-all duration-300"
+              onClick={() => window.location.href = "mailto:noah@noahfearnleyofficial.com"}
+            >
+              Contact Noah <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </ScrollReveal>
         </div>
       </section>
