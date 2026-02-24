@@ -157,9 +157,13 @@ const FanClub = () => {
               <Mail className="h-8 w-8 text-primary" />
             </div>
             <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">Fan Mail</h2>
-            <p className="text-muted-foreground text-lg mb-8">
+            <p className="text-muted-foreground text-lg mb-4">
               Want to reach out to Noah directly? He loves hearing from his fans!
               Send him a message and stay connected.
+            </p>
+            <p className="text-primary font-medium mb-8 flex items-center justify-center gap-2">
+              <Star className="h-4 w-4" />
+              Fan Club members receive priority access and treatment
             </p>
             <Button
               size="lg"
