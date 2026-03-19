@@ -5,7 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from "@/components/ScrollReveal";
 
 const events = [
-  { title: "VIP Meet-and-Greet", date: "March 15, 2026", location: "LA Film Festival, Los Angeles, CA", description: "An exclusive, intimate meet-and-greet with Noah. Fan club members receive priority access, photo opportunities, and signed memorabilia.", tickets: true },
+  { 
+    title: "VIP Meet-and-Greet", 
+    date: "March 15, 2026", 
+    location: "LA Film Festival, Los Angeles, CA", 
+    description: "Thank you to everyone who joined us for this exclusive, intimate meet-and-greet with Noah! It was an incredible experience with photo opportunities and signed memorabilia for our fan club members. We truly appreciate everyone who came out and made it possible.", 
+    tickets: false,
+    passed: true 
+  },
   { title: "Private Screening — 'Mercy'", date: "April 22, 2026", location: "AMC Theatre, New York, NY", description: "Join Noah for an exclusive private screening of 'Mercy' followed by a live Q&A session. Limited seats available for fan club members.", tickets: true },
   { title: "Fan Club Appreciation Night", date: "May 10, 2026", location: "The Hollywood Roosevelt, Los Angeles, CA", description: "A night dedicated to Noah's most loyal fans. Enjoy cocktails, live entertainment, and special announcements about upcoming projects.", tickets: true },
   { title: "Comic-Con Panel", date: "July 18, 2026", location: "San Diego Convention Center, San Diego, CA", description: "Noah joins the 'Mercy' cast for a Comic-Con panel discussion. Expect exclusive reveals, behind-the-scenes footage, and audience Q&A.", tickets: false },
@@ -33,7 +40,14 @@ const Events = () => {
             <ScrollReveal key={i} delay={i * 0.08}>
               <Card className="bg-card border-border hover:border-primary/30 transition-colors">
                 <CardContent className="p-6 md:p-8">
-                  <h2 className="font-serif text-xl md:text-2xl font-semibold mb-3">{event.title}</h2>
+                  <div className="flex justify-between items-start mb-3">
+                    <h2 className="font-serif text-xl md:text-2xl font-semibold">{event.title}</h2>
+                    {event.passed && (
+                      <span className="bg-primary/10 text-primary text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border border-primary/20">
+                        Passed
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-wrap gap-4 mb-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                       <CalendarDays className="h-4 w-4 text-primary" /> {event.date}
