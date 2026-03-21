@@ -11,6 +11,7 @@ import News from "./pages/News";
 import Gallery from "./pages/Gallery";
 import Events from "./pages/Events";
 import FanClub from "./pages/FanClub";
+import Charity from "./pages/Charity";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/events" element={<Events />} />
             <Route path="/fan-club" element={<FanClub />} />
+            <Route path="/charity" element={<Charity />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

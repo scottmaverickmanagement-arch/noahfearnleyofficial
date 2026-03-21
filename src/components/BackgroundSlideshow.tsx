@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 // Dynamically import all gallery images
-const galleryModules = import.meta.glob("@/assets/gallery/*.jpg", { eager: true });
+const galleryModules = import.meta.glob("../../assets/gallery/*.jpg", { eager: true });
 const galleryImages = Object.values(galleryModules).map((mod) => (mod as { default: string }).default);
 
 interface BackgroundSlideshowProps {

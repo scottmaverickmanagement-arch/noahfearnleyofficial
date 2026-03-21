@@ -12,6 +12,7 @@ const navItems = [
   { label: "Gallery", path: "/gallery" },
   { label: "Events", path: "/events" },
   { label: "Fan Club", path: "/fan-club" },
+  { label: "Charity", path: "/charity" },
   { label: "Contact", path: "/contact" },
 ];
 
