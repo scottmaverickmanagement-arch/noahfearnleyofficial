@@ -88,13 +88,11 @@ const contentStops = [
 
 const TOTAL_FRAMES = 1770;
 const FPS = 30;
-const TOTAL_DURATION = TOTAL_FRAMES / FPS; // ~59s
+// Target cinematic duration per transition in seconds
+// Clamp so short transitions (17 frames) still take ≥2s and long ones (657 frames) take ≤5s
+const MIN_TRANSITION_S = 2.0;
+const MAX_TRANSITION_S = 5.0;
 
-// Cinematic easing — slow in, slow out, with a hold in the middle
-// This gives a film-like feel even though it's all driven by video scrubbing
-const CINEMATIC_DURATION_MS = 4000; // 4 seconds, matching old feel
-
-// Convert frame number (1-indexed) to video time in seconds
 const frameToTime = (frame: number) => (frame - 1) / FPS;
 
 const CharityScrollSequence = () => {
@@ -107,108 +105,146 @@ const CharityScrollSequence = () => {
     const [showText, setShowText] = useState(true);
     const [videoReady, setVideoReady] = useState(false);
 
-    // Animation state — uses RAF lerp, not framer-motion, for zero-overhead scrubbing
-    const animStateRef = useRef({
-        isAnimating: false,
-        startTime: 0,
-        fromTime: 0,
-        toTime: 0,
-        duration: CINEMATIC_DURATION_MS,
-        onComplete: null as (() => void) | null,
-    });
+    const isAnimatingRef = useRef(false);
+    const currentIndexRef = useRef(0);
+    const lastNavTimeRef = useRef(0);
+    const targetTimeRef = useRef(0);
+    const stopCheckRafRef = useRef<number>(0);
 
-    // Cinematic easing function (cubic ease in-out)
-    const easeInOutCubic = (t: number) =>
-        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
 
-    // --- RAF loop: draws video frame to canvas every tick ---
+    // -----------------------------------------------------------------------
+    // Canvas drawing — uses requestVideoFrameCallback (rVFC) when available.
+    // rVFC fires exactly once per decoded video frame, so every frame of the
+    // video gets painted to canvas — no skips, no duplicates.
+    // Falls back to a standard RAF loop on older browsers.
+    // -----------------------------------------------------------------------
     useEffect(() => {
-        let rafId: number;
-        const anim = animStateRef.current;
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const bgCanvas = bgCanvasRef.current;
+        if (!video || !canvas) return;
 
-        const loop = (timestamp: number) => {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
-            const bgCanvas = bgCanvasRef.current;
+        let rafId = 0;
+        let stopped = false;
 
-            // Drive animation — lerp video.currentTime toward target
-            if (anim.isAnimating) {
-                const elapsed = timestamp - anim.startTime;
-                const progress = Math.min(elapsed / anim.duration, 1);
-                const eased = easeInOutCubic(progress);
-                const newTime = anim.fromTime + (anim.toTime - anim.fromTime) * eased;
+        const paintFrame = () => {
+            if (stopped) return;
 
-                if (video) {
-                    video.currentTime = newTime;
-                }
+            const ctx = canvas.getContext('2d');
+            if (ctx && video.readyState >= 2 && canvas.width > 0 && canvas.height > 0) {
+                const { videoWidth: vw, videoHeight: vh } = video;
+                const { width: cw, height: ch } = canvas;
+                const ratio = Math.max(cw / vw, ch / vh);
+                const cx = (cw - vw * ratio) / 2;
+                const cy = (ch - vh * ratio) / 2;
+                ctx.drawImage(video, 0, 0, vw, vh, cx, cy, vw * ratio, vh * ratio);
 
-                if (progress >= 1) {
-                    anim.isAnimating = false;
-                    if (anim.onComplete) {
-                        anim.onComplete();
-                        anim.onComplete = null;
-                    }
-                }
-            }
-
-            // Draw current video frame to canvas
-            if (video && canvas && video.readyState >= 2) {
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    const ratio = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
-                    const cx = (canvas.width - video.videoWidth * ratio) / 2;
-                    const cy = (canvas.height - video.videoHeight * ratio) / 2;
-                    ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight,
-                        cx, cy, video.videoWidth * ratio, video.videoHeight * ratio);
-
-                    // Draw blurry background for mobile
-                    if (bgCanvas) {
-                        const bgCtx = bgCanvas.getContext('2d');
-                        if (bgCtx) {
-                            bgCtx.drawImage(video, 0, 0, bgCanvas.width, bgCanvas.height);
-                        }
-                    }
+                // Blurry background for mobile
+                if (bgCanvas) {
+                    const bgCtx = bgCanvas.getContext('2d');
+                    if (bgCtx) bgCtx.drawImage(video, 0, 0, bgCanvas.width, bgCanvas.height);
                 }
             }
 
-            rafId = requestAnimationFrame(loop);
+            // Schedule next paint
+            if ('requestVideoFrameCallback' in video) {
+                // Frame-accurate: fires exactly when the next video frame is ready
+                (video as any).requestVideoFrameCallback(paintFrame);
+            } else {
+                // Fallback: standard RAF (may miss frames on slow devices but still works)
+                rafId = requestAnimationFrame(paintFrame);
+            }
         };
 
-        rafId = requestAnimationFrame(loop);
-        return () => cancelAnimationFrame(rafId);
+        if ('requestVideoFrameCallback' in video) {
+            (video as any).requestVideoFrameCallback(paintFrame);
+        } else {
+            rafId = requestAnimationFrame(paintFrame);
+        }
+
+        return () => {
+            stopped = true;
+            if (rafId) cancelAnimationFrame(rafId);
+        };
     }, []);
 
-    // Navigate to a content stop index with cinematic animation
-    const navigateTo = useCallback((targetIndex: number, fromIndex: number) => {
+    // -----------------------------------------------------------------------
+    // Navigate: plays the video through every frame between current and target.
+    // Uses a dynamic playback rate so the cinematic duration is always ~2-5s
+    // regardless of how many frames need to play.
+    // -----------------------------------------------------------------------
+    const navigateTo = useCallback((targetIndex: number) => {
         const video = videoRef.current;
         if (!video) return;
 
-        const clampedIndex = Math.max(0, Math.min(contentStops.length - 1, targetIndex));
-        const targetTime = frameToTime(contentStops[clampedIndex].frame);
-        const fromTime = video.currentTime;
+        const clampedIdx = Math.max(0, Math.min(contentStops.length - 1, targetIndex));
+        const targetTime = frameToTime(contentStops[clampedIdx].frame);
+        const currentTime = video.currentTime;
+        const span = Math.abs(targetTime - currentTime); // seconds of video content
+
+        // If span is negligible (already there), just show the text
+        if (span < 0.1) {
+            setCurrentIndex(clampedIdx);
+            setShowText(true);
+            isAnimatingRef.current = false;
+            return;
+        }
+
+        // Calculate playback rate so the transition duration is clamped to [MIN, MAX]
+        // e.g.: 0.567s span → play at 0.28x for 2s (very slow, every frame visible)
+        //       21.9s span  → play at 4.38x for 5s (fast but all frames shown)
+        const desiredDuration = Math.min(MAX_TRANSITION_S, Math.max(MIN_TRANSITION_S, span));
+        const rate = span / desiredDuration;
+        const clampedRate = Math.max(0.1, Math.min(16, rate)); // browser limits playbackRate
+
+        // Cancel any previous stop-check loop
+        cancelAnimationFrame(stopCheckRafRef.current);
 
         setShowText(false);
+        isAnimatingRef.current = true;
+        targetTimeRef.current = targetTime;
 
-        // Cancel any running animation and start new one
-        const anim = animStateRef.current;
-        anim.isAnimating = true;
-        anim.startTime = performance.now();
-        anim.fromTime = fromTime;
-        anim.toTime = targetTime;
-        anim.duration = CINEMATIC_DURATION_MS;
-        anim.onComplete = () => {
-            setCurrentIndex(clampedIndex);
-            setShowText(true);
+        // If going backwards, we need to scrub currentTime first
+        // (HTML video can only play() forward)
+        if (targetTime < currentTime) {
+            // Seek to the start of the range then play forward
+            // This is rare (user scrolled up) — a brief seek then play is fine
+            video.pause();
+            video.currentTime = targetTime - 0.033; // 1 frame before target
+            video.playbackRate = 1;
+            video.addEventListener('seeked', () => {
+                setCurrentIndex(clampedIdx);
+                setShowText(true);
+                isAnimatingRef.current = false;
+            }, { once: true });
+            return;
+        }
+
+        video.playbackRate = clampedRate;
+        video.play().catch(() => {}); // ignore autoplay policy errors
+
+        // Monitor playback — stop when we hit the target time
+        const checkStop = () => {
+            if (!video || video.paused) return;
+            if (video.currentTime >= targetTime) {
+                video.pause();
+                video.currentTime = targetTime; // snap exactly to target frame
+                video.playbackRate = 1;
+                isAnimatingRef.current = false;
+                setCurrentIndex(clampedIdx);
+                setShowText(true);
+            } else {
+                stopCheckRafRef.current = requestAnimationFrame(checkStop);
+            }
         };
+        stopCheckRafRef.current = requestAnimationFrame(checkStop);
     }, []);
 
-    // Touch/scroll navigation — note: NOT blocked during animation
-    // Swipes always accepted and cancel the current animation
-    const currentIndexRef = useRef(0);
-    useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
-
-    const lastNavTimeRef = useRef(0);
-    const NAV_COOLDOWN_MS = 400; // Prevent rapid-fire double triggers
+    // -----------------------------------------------------------------------
+    // Input handlers — wheel, keyboard, touch
+    // -----------------------------------------------------------------------
+    const NAV_COOLDOWN_MS = 300;
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -216,17 +252,19 @@ const CharityScrollSequence = () => {
         const tryNavigate = (direction: 'next' | 'prev') => {
             const now = Date.now();
             if (now - lastNavTimeRef.current < NAV_COOLDOWN_MS) return;
+            // Allow new navigation even mid-animation (interrupts the current one)
             lastNavTimeRef.current = now;
 
             const idx = currentIndexRef.current;
             if (direction === 'next') {
                 const nextIdx = idx + 1 >= contentStops.length ? 0 : idx + 1;
-                navigateTo(nextIdx, idx);
-                currentIndexRef.current = nextIdx; // track optimistically so rapid swipes chain
+                currentIndexRef.current = nextIdx;
+                navigateTo(nextIdx);
             } else {
                 if (idx === 0) return;
-                navigateTo(idx - 1, idx);
-                currentIndexRef.current = idx - 1;
+                const prevIdx = idx - 1;
+                currentIndexRef.current = prevIdx;
+                navigateTo(prevIdx);
             }
         };
 
@@ -241,9 +279,7 @@ const CharityScrollSequence = () => {
         };
 
         let touchStartY = 0;
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartY = e.touches[0].clientY;
-        };
+        const handleTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; };
         const handleTouchEnd = (e: TouchEvent) => {
             const deltaY = touchStartY - e.changedTouches[0].clientY;
             if (deltaY > 40) tryNavigate('next');
@@ -306,7 +342,7 @@ const CharityScrollSequence = () => {
     return (
         <div className="fixed inset-0 w-full h-full bg-black overflow-hidden z-50 flex flex-col md:block">
 
-            {/* Hidden video element — the browser buffers this automatically */}
+            {/* Hidden video — preloaded, muted, will be played forward through frames */}
             <video
                 ref={videoRef}
                 src="/charity_scroll.mp4"
@@ -317,7 +353,7 @@ const CharityScrollSequence = () => {
                 onCanPlay={() => setVideoReady(true)}
             />
 
-            {/* Loading overlay — shown until video is buffered enough to play */}
+            {/* Loading state */}
             {!videoReady && (
                 <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
                     <div className="flex flex-col items-center gap-4">
@@ -327,14 +363,14 @@ const CharityScrollSequence = () => {
                 </div>
             )}
 
-            {/* Background blurry silhouette — mobile only */}
+            {/* Blurry background — mobile only */}
             <canvas 
                 ref={bgCanvasRef}
                 className="absolute inset-0 w-full h-full opacity-[0.55] scale-125 z-0 md:hidden pointer-events-none transform-gpu"
                 style={{ imageRendering: 'pixelated', filter: 'blur(20px)' }}
             />
             
-            {/* Main canvas */}
+            {/* Main frame canvas */}
             <div 
                 ref={canvasContainerRef} 
                 className="relative w-full h-[45vh] md:h-full md:absolute md:inset-0 z-0 bg-transparent flex justify-center overflow-hidden shrink-0 shadow-[0_15px_60px_rgba(0,0,0,0.8)] md:shadow-none"
@@ -358,17 +394,17 @@ const CharityScrollSequence = () => {
                             className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto w-full pointer-events-auto h-full md:h-auto"
                         >
                             <div 
-                                className="bg-gradient-to-b from-black/85 via-black/80 to-black/95 md:bg-gradient-to-b md:from-black/80 md:via-black/60 md:to-black/80 md:backdrop-blur-xl p-6 md:p-16 rounded-[2rem] md:rounded-3xl border border-white/15 md:border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] w-full relative overflow-y-auto overflow-x-hidden max-h-full"
+                                className="bg-gradient-to-b from-black/85 via-black/80 to-black/95 md:from-black/80 md:via-black/60 md:to-black/80 md:backdrop-blur-xl p-6 md:p-16 rounded-[2rem] md:rounded-3xl border border-white/15 md:border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] w-full relative overflow-y-auto overflow-x-hidden max-h-full"
                                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                             >
                                 <style dangerouslySetInnerHTML={{__html: `::-webkit-scrollbar { display: none; }`}} />
-                                <div className="absolute inset-0 bg-primary/5 opacity-30 md:opacity-50 pointer-events-none mix-blend-overlay"></div>
+                                <div className="absolute inset-0 bg-primary/5 opacity-30 md:opacity-50 pointer-events-none mix-blend-overlay" />
                                 
                                 {activeContent.category && (
                                     <motion.p variants={itemVariants} className="tracking-[0.2em] md:tracking-[0.4em] text-primary uppercase text-[10px] md:text-sm font-semibold mb-3 md:mb-6 flex items-center justify-center gap-3 md:gap-4">
-                                        <span className="w-6 md:w-8 h-[1px] bg-primary/50"></span>
+                                        <span className="w-6 md:w-8 h-[1px] bg-primary/50" />
                                         {activeContent.category}
-                                        <span className="w-6 md:w-8 h-[1px] bg-primary/50"></span>
+                                        <span className="w-6 md:w-8 h-[1px] bg-primary/50" />
                                     </motion.p>
                                 )}
                                 
