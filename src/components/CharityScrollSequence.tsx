@@ -18,14 +18,14 @@ const contentStops = [
         button: null 
     },
     { 
-        frame: 160, 
+        frame: 145, 
         category: "Animal Wellness", 
         text: "Together, we have rescued and rehabilitated countless animals. The journey involves dedicated care, medical attention, and safe fostering environments.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 257, 
+        frame: 242, 
         category: "Animal Wellness", 
         text: "Join us in our continuous partnership with Best Friends Animal Society to ensure every pet finds a family.", 
         description: null, 
@@ -33,21 +33,21 @@ const contentStops = [
         link: "https://bestfriends.org/" 
     },
     { 
-        frame: 423, 
+        frame: 408, 
         category: "Environmental Conservation", 
         text: "Protecting our oceans is vital for the future of our planet. Our environmental conservation efforts focus on cleanups and marine life protection.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 565, 
+        frame: 550, 
         category: "Environmental Conservation", 
         text: "By mobilizing communities, we've removed tons of plastic from beaches, restoring habitats and promoting sustainable practices globally.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 697, 
+        frame: 682, 
         category: "Environmental Conservation", 
         text: "Help us safeguard the oceans by supporting Oceana's critical campaigns.", 
         description: null, 
@@ -55,14 +55,14 @@ const contentStops = [
         link: "https://oceana.org/" 
     },
     { 
-        frame: 850, 
+        frame: 835, 
         category: "Art & Education", 
         text: "Art and education empower the next generation. We advocate for accessible creative programs in underfunded schools.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 990, 
+        frame: 975, 
         category: "Art & Education", 
         text: "Our initiatives have provided supplies and scholarships to hundreds of students. Support local creativity.", 
         description: null, 
@@ -70,14 +70,14 @@ const contentStops = [
         link: "https://www.artsforla.org/" 
     },
     { 
-        frame: 1085, 
+        frame: 1070, 
         category: "Children's Hospitals", 
         text: "Bringing hope and advanced care to children fighting severe illnesses. We believe in providing the best medical support and comfort.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 1240, 
+        frame: 1225, 
         category: "Children's Hospitals", 
         text: "Our partnership helps fund life-saving treatments and research. Be a part of the miracle.", 
         description: null, 
@@ -86,7 +86,7 @@ const contentStops = [
     }
 ];
 
-const TOTAL_FRAMES = 1410;
+const TOTAL_FRAMES = 1395;
 const ANIMATION_DURATION = 4.0; // Seconds spent moving between frames
 
 const CharityScrollSequence = () => {
