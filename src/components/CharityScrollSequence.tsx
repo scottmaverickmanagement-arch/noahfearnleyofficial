@@ -208,9 +208,12 @@ const CharityScrollSequence = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        let isCurrent = true;
+
         const img = new Image();
         img.src = `/frames_optimized/frame-${renderedFrame}.webp`;
         img.onload = () => {
+            if (!isCurrent) return;
             // Draw main foreground canvas
             const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
             const centerShift_x = (canvas.width - img.width * ratio) / 2;
@@ -232,23 +235,25 @@ const CharityScrollSequence = () => {
                 }
             }
         };
+
+        return () => { isCurrent = false; };
     }, [renderedFrame]);
 
     // Canvas robust resize handling
     useEffect(() => {
         const handleResize = () => {
             if (canvasRef.current && canvasContainerRef.current) {
-                const dpr = window.devicePixelRatio || 1;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 to save performance
                 const rect = canvasContainerRef.current.getBoundingClientRect();
                 
                 // Map the internal canvas resolution to the display's exact physical pixels for its container
                 canvasRef.current.width = rect.width * dpr;
                 canvasRef.current.height = rect.height * dpr;
                 
-                // Keep the blurry silhouette matching full screen DPR
+                // Keep the blurry silhouette at a strictly reduced resolution to aggressively save mobile GPU
                 if (bgCanvasRef.current) {
-                    bgCanvasRef.current.width = window.innerWidth * dpr;
-                    bgCanvasRef.current.height = window.innerHeight * dpr;
+                    bgCanvasRef.current.width = window.innerWidth * 0.15;
+                    bgCanvasRef.current.height = window.innerHeight * 0.15;
                 }
                 
                 setRenderedFrame(prev => prev); // triggers re-draw
