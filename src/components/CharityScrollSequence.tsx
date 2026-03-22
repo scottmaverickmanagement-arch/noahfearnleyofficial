@@ -93,6 +93,11 @@ const CharityScrollSequence = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasContainerRef = useRef<HTMLDivElement>(null);
     const bgCanvasRef = useRef<HTMLCanvasElement>(null);
+    
+    // Request tracking to prevent out-of-order painting without skipping delayed frames
+    const latestRequestIdRef = useRef(0);
+    const lastDrawnRequestIdRef = useRef(-1);
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     
@@ -208,12 +213,20 @@ const CharityScrollSequence = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        let isCurrent = true;
+        latestRequestIdRef.current += 1;
+        const thisRequestId = latestRequestIdRef.current;
 
         const img = new Image();
+        img.decoding = 'async'; // Offload decoding to prevent main-thread jank
         img.src = `/frames_optimized/frame-${renderedFrame}.webp`;
+        
         img.onload = () => {
-            if (!isCurrent) return;
+            // Only discard this frame if a strictly newer requested frame has ALREADY been drawn.
+            // This prevents screen tearing (out of order), but allows slightly delayed frames
+            // to still draw, completely fixing the frozen screen/stuttering effect!
+            if (thisRequestId < lastDrawnRequestIdRef.current) return;
+            lastDrawnRequestIdRef.current = thisRequestId;
+
             // Draw main foreground canvas
             const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
             const centerShift_x = (canvas.width - img.width * ratio) / 2;
@@ -235,8 +248,6 @@ const CharityScrollSequence = () => {
                 }
             }
         };
-
-        return () => { isCurrent = false; };
     }, [renderedFrame]);
 
     // Canvas robust resize handling
