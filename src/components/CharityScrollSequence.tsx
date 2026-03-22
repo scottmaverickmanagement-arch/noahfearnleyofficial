@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { motion, animate, useMotionValue, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 const contentStops = [
     { 
@@ -87,120 +87,87 @@ const contentStops = [
 ];
 
 const TOTAL_FRAMES = 1770;
-const ANIMATION_DURATION = 4.0; // Cinematic pace — preserved as requested
+const FPS = 30;
+const TOTAL_DURATION = TOTAL_FRAMES / FPS; // ~59s
+
+// Cinematic easing — slow in, slow out, with a hold in the middle
+// This gives a film-like feel even though it's all driven by video scrubbing
+const CINEMATIC_DURATION_MS = 4000; // 4 seconds, matching old feel
+
+// Convert frame number (1-indexed) to video time in seconds
+const frameToTime = (frame: number) => (frame - 1) / FPS;
 
 const CharityScrollSequence = () => {
+    const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasContainerRef = useRef<HTMLDivElement>(null);
     const bgCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    // Track the currently displayed index and whether text should be hidden (mid-transition)
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showText, setShowText] = useState(true);
+    const [videoReady, setVideoReady] = useState(false);
 
-    const motionFrame = useMotionValue(1);
+    // Animation state — uses RAF lerp, not framer-motion, for zero-overhead scrubbing
+    const animStateRef = useRef({
+        isAnimating: false,
+        startTime: 0,
+        fromTime: 0,
+        toTime: 0,
+        duration: CINEMATIC_DURATION_MS,
+        onComplete: null as (() => void) | null,
+    });
 
-    // --- KEY FIX #1: Use a ref to track active animation so we can CANCEL it ---
-    // This allows any swipe/scroll to interrupt a running animation and jump straight
-    // to the next stop — solving the "6-8 swipes barely moves" mobile problem.
-    const activeAnimationRef = useRef<{ stop: () => void } | null>(null);
-    
-    // Pending navigation ref — queues a next/prev action if one is mid-flight
-    const pendingNavRef = useRef<'next' | 'prev' | null>(null);
-    const isAnimatingRef = useRef(false);
+    // Cinematic easing function (cubic ease in-out)
+    const easeInOutCubic = (t: number) =>
+        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-    // --- KEY FIX #2: Large RAM cache (150 frames) and aggressive lookahead ---
-    const MAX_CACHE_SIZE = 150;
-    const imageCache = useRef<Map<number, HTMLImageElement>>(new Map());
-
-    // Evict frames far from 'current', keep a 150-frame sliding window
-    const evictCache = useCallback((current: number) => {
-        if (imageCache.current.size > MAX_CACHE_SIZE) {
-            for (const [key, img] of imageCache.current.entries()) {
-                if (Math.abs(key - current) > MAX_CACHE_SIZE / 2) {
-                    img.src = '';
-                    imageCache.current.delete(key);
-                }
-            }
-        }
-    }, []);
-
-    // Standard rolling preload — always look 30 frames ahead and 10 behind
-    const preloadAround = useCallback((current: number) => {
-        evictCache(current);
-        const ahead = 30;
-        const behind = 10;
-        for (let i = Math.max(1, current - behind); i <= Math.min(TOTAL_FRAMES, current + ahead); i++) {
-            if (!imageCache.current.has(i)) {
-                const img = new Image();
-                img.decoding = 'async';
-                img.src = `/frames_optimized/frame-${i}.webp`;
-                imageCache.current.set(i, img);
-            }
-        }
-    }, [evictCache]);
-
-    // --- KEY FIX #3: Destination burst preload —
-    // When navigation is triggered, immediately fire off loads for the ENTIRE
-    // target frame range so frames are ready before the animation reaches them.
-    const preloadDestinationRange = useCallback((from: number, to: number) => {
-        const start = Math.min(from, to);
-        const end = Math.max(from, to);
-        // Load in batches of 60 spaced across the range — covers keyframes without
-        // hammering the network with all 700+ at once
-        const step = Math.max(1, Math.floor((end - start) / 60));
-        for (let i = start; i <= end; i += step) {
-            if (!imageCache.current.has(i)) {
-                const img = new Image();
-                img.decoding = 'async';
-                img.src = `/frames_optimized/frame-${i}.webp`;
-                imageCache.current.set(i, img);
-            }
-        }
-    }, []);
-
-    // --- KEY FIX #4: requestAnimationFrame loop for canvas drawing ---
-    // Replaces the old useMotionValueEvent → setState → useEffect chain.
-    // This eliminates hundreds of React re-renders during every animation,
-    // letting the canvas update at full 60fps with zero React overhead.
+    // --- RAF loop: draws video frame to canvas every tick ---
     useEffect(() => {
         let rafId: number;
-        let lastDrawnFrame = -1;
+        const anim = animStateRef.current;
 
-        const loop = () => {
+        const loop = (timestamp: number) => {
+            const video = videoRef.current;
             const canvas = canvasRef.current;
             const bgCanvas = bgCanvasRef.current;
-            if (!canvas) { rafId = requestAnimationFrame(loop); return; }
 
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { rafId = requestAnimationFrame(loop); return; }
+            // Drive animation — lerp video.currentTime toward target
+            if (anim.isAnimating) {
+                const elapsed = timestamp - anim.startTime;
+                const progress = Math.min(elapsed / anim.duration, 1);
+                const eased = easeInOutCubic(progress);
+                const newTime = anim.fromTime + (anim.toTime - anim.fromTime) * eased;
 
-            const rawFrame = motionFrame.get();
-            const frame = Math.max(1, Math.min(TOTAL_FRAMES, Math.round(rawFrame)));
+                if (video) {
+                    video.currentTime = newTime;
+                }
 
-            // Only redraw if the frame number has actually changed
-            if (frame !== lastDrawnFrame) {
-                lastDrawnFrame = frame;
-                preloadAround(frame);
+                if (progress >= 1) {
+                    anim.isAnimating = false;
+                    if (anim.onComplete) {
+                        anim.onComplete();
+                        anim.onComplete = null;
+                    }
+                }
+            }
 
-                const img = imageCache.current.get(frame);
-                if (img && img.complete && img.naturalWidth > 0) {
-                    const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
-                    const cx = (canvas.width - img.width * ratio) / 2;
-                    const cy = (canvas.height - img.height * ratio) / 2;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
+            // Draw current video frame to canvas
+            if (video && canvas && video.readyState >= 2) {
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    const ratio = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
+                    const cx = (canvas.width - video.videoWidth * ratio) / 2;
+                    const cy = (canvas.height - video.videoHeight * ratio) / 2;
+                    ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight,
+                        cx, cy, video.videoWidth * ratio, video.videoHeight * ratio);
 
+                    // Draw blurry background for mobile
                     if (bgCanvas) {
                         const bgCtx = bgCanvas.getContext('2d');
                         if (bgCtx) {
-                            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-                            bgCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, bgCanvas.width, bgCanvas.height);
+                            bgCtx.drawImage(video, 0, 0, bgCanvas.width, bgCanvas.height);
                         }
                     }
-                } else if (img && !img.complete) {
-                    // Frame not yet loaded — attach onload so it draws as soon as ready
-                    img.onload = () => { lastDrawnFrame = -1; }; // Reset so loop redraws on next tick
                 }
             }
 
@@ -209,113 +176,78 @@ const CharityScrollSequence = () => {
 
         rafId = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(rafId);
-    }, [preloadAround]);
+    }, []);
 
-    // Core navigation logic — with interruption support
-    const navigateTo = useCallback((targetIndex: number) => {
+    // Navigate to a content stop index with cinematic animation
+    const navigateTo = useCallback((targetIndex: number, fromIndex: number) => {
+        const video = videoRef.current;
+        if (!video) return;
+
         const clampedIndex = Math.max(0, Math.min(contentStops.length - 1, targetIndex));
-        const targetFrame = contentStops[clampedIndex].frame;
-        const currentFrame = Math.round(motionFrame.get());
+        const targetTime = frameToTime(contentStops[clampedIndex].frame);
+        const fromTime = video.currentTime;
 
-        // Cancel any in-flight animation immediately
-        if (activeAnimationRef.current) {
-            activeAnimationRef.current.stop();
-            activeAnimationRef.current = null;
-        }
+        setShowText(false);
 
-        // Burst-preload target range so frames are ready
-        preloadDestinationRange(currentFrame, targetFrame);
+        // Cancel any running animation and start new one
+        const anim = animStateRef.current;
+        anim.isAnimating = true;
+        anim.startTime = performance.now();
+        anim.fromTime = fromTime;
+        anim.toTime = targetTime;
+        anim.duration = CINEMATIC_DURATION_MS;
+        anim.onComplete = () => {
+            setCurrentIndex(clampedIndex);
+            setShowText(true);
+        };
+    }, []);
 
-        setShowText(false); // Hide text during transition
+    // Touch/scroll navigation — note: NOT blocked during animation
+    // Swipes always accepted and cancel the current animation
+    const currentIndexRef = useRef(0);
+    useEffect(() => { currentIndexRef.current = currentIndex; }, [currentIndex]);
 
-        isAnimatingRef.current = true;
-        const controls = animate(motionFrame, targetFrame, {
-            duration: ANIMATION_DURATION,
-            ease: "easeInOut",
-            onComplete: () => {
-                isAnimatingRef.current = false;
-                activeAnimationRef.current = null;
-                setCurrentIndex(clampedIndex);
-                setShowText(true);
+    const lastNavTimeRef = useRef(0);
+    const NAV_COOLDOWN_MS = 400; // Prevent rapid-fire double triggers
 
-                // Process any queued navigation that arrived while we were animating
-                if (pendingNavRef.current) {
-                    const pending = pendingNavRef.current;
-                    pendingNavRef.current = null;
-                    setCurrentIndex(prev => {
-                        const nextIdx = pending === 'next' 
-                            ? Math.min(contentStops.length - 1, prev + 1)
-                            : Math.max(0, prev - 1);
-                        // schedule the next navigate on next tick so state is flushed
-                        setTimeout(() => navigateTo(nextIdx), 0);
-                        return prev;
-                    });
-                }
-            }
-        });
-
-        activeAnimationRef.current = controls;
-    }, [motionFrame, preloadDestinationRange]);
-
-    const goToNext = useCallback(() => {
-        setCurrentIndex(prev => {
-            const nextIdx = prev + 1 >= contentStops.length ? 0 : prev + 1;
-            // If animating, queue it — the onComplete handler will pick it up
-            if (isAnimatingRef.current) {
-                pendingNavRef.current = 'next';
-                return prev;
-            }
-            navigateTo(nextIdx);
-            return prev; // actual state update happens in navigateTo's onComplete
-        });
-    }, [navigateTo]);
-
-    const goToPrev = useCallback(() => {
-        setCurrentIndex(prev => {
-            if (prev === 0) return prev;
-            const prevIdx = prev - 1;
-            if (isAnimatingRef.current) {
-                pendingNavRef.current = 'prev';
-                return prev;
-            }
-            navigateTo(prevIdx);
-            return prev;
-        });
-    }, [navigateTo]);
-
-    // Input handlers
     useEffect(() => {
         document.body.style.overflow = 'hidden';
 
+        const tryNavigate = (direction: 'next' | 'prev') => {
+            const now = Date.now();
+            if (now - lastNavTimeRef.current < NAV_COOLDOWN_MS) return;
+            lastNavTimeRef.current = now;
+
+            const idx = currentIndexRef.current;
+            if (direction === 'next') {
+                const nextIdx = idx + 1 >= contentStops.length ? 0 : idx + 1;
+                navigateTo(nextIdx, idx);
+                currentIndexRef.current = nextIdx; // track optimistically so rapid swipes chain
+            } else {
+                if (idx === 0) return;
+                navigateTo(idx - 1, idx);
+                currentIndexRef.current = idx - 1;
+            }
+        };
+
         const handleWheel = (e: WheelEvent) => {
-            if (e.deltaY > 30) goToNext();
-            else if (e.deltaY < -30) goToPrev();
+            if (e.deltaY > 30) tryNavigate('next');
+            else if (e.deltaY < -30) tryNavigate('prev');
         };
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') goToNext();
-            if (e.key === 'ArrowUp' || e.key === 'PageUp') goToPrev();
+            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') tryNavigate('next');
+            if (e.key === 'ArrowUp' || e.key === 'PageUp') tryNavigate('prev');
         };
 
         let touchStartY = 0;
-        let lastTouchTime = 0;
-
         const handleTouchStart = (e: TouchEvent) => {
             touchStartY = e.touches[0].clientY;
         };
-
         const handleTouchEnd = (e: TouchEvent) => {
-            const now = Date.now();
-            // Debounce: ignore taps faster than 300ms apart to prevent double-firing
-            if (now - lastTouchTime < 300) return;
             const deltaY = touchStartY - e.changedTouches[0].clientY;
-            if (deltaY > 40) {
-                lastTouchTime = now;
-                goToNext();
-            } else if (deltaY < -40) {
-                lastTouchTime = now;
-                goToPrev();
-            }
+            if (deltaY > 40) tryNavigate('next');
+            else if (deltaY < -40) tryNavigate('prev');
         };
 
         window.addEventListener('wheel', handleWheel, { passive: true });
@@ -330,9 +262,9 @@ const CharityScrollSequence = () => {
             window.removeEventListener('touchstart', handleTouchStart);
             window.removeEventListener('touchend', handleTouchEnd);
         };
-    }, [goToNext, goToPrev]);
+    }, [navigateTo]);
 
-    // Canvas resize handler
+    // Canvas resize
     useEffect(() => {
         const handleResize = () => {
             if (canvasRef.current && canvasContainerRef.current) {
@@ -351,30 +283,16 @@ const CharityScrollSequence = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Boot: preload the first 30 frames immediately on mount
-    useEffect(() => {
-        preloadAround(1);
-    }, [preloadAround]);
-
     const activeContent = contentStops[currentIndex];
 
     const containerVariants: Variants = {
         hidden: { opacity: 0, scale: 0.95, y: 120 },
         visible: { 
-            opacity: 1, 
-            scale: 1, 
-            y: 0,
-            transition: { 
-                duration: 1.2, 
-                ease: [0.22, 1, 0.36, 1],
-                delayChildren: 0.2,
-                staggerChildren: 0.1
-            }
+            opacity: 1, scale: 1, y: 0,
+            transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1], delayChildren: 0.2, staggerChildren: 0.1 }
         },
         exit: { 
-            opacity: 0, 
-            scale: 1.05, 
-            y: -120,
+            opacity: 0, scale: 1.05, y: -120,
             transition: { duration: 0.8, ease: "easeInOut" } 
         }
     };
@@ -387,14 +305,36 @@ const CharityScrollSequence = () => {
 
     return (
         <div className="fixed inset-0 w-full h-full bg-black overflow-hidden z-50 flex flex-col md:block">
-            {/* Background blurry silhouette for mobile */}
+
+            {/* Hidden video element — the browser buffers this automatically */}
+            <video
+                ref={videoRef}
+                src="/charity_scroll.mp4"
+                preload="auto"
+                muted
+                playsInline
+                className="absolute opacity-0 pointer-events-none w-px h-px"
+                onCanPlay={() => setVideoReady(true)}
+            />
+
+            {/* Loading overlay — shown until video is buffered enough to play */}
+            {!videoReady && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                        <p className="text-white/50 text-xs uppercase tracking-widest">Loading</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Background blurry silhouette — mobile only */}
             <canvas 
                 ref={bgCanvasRef}
                 className="absolute inset-0 w-full h-full opacity-[0.55] scale-125 z-0 md:hidden pointer-events-none transform-gpu"
                 style={{ imageRendering: 'pixelated', filter: 'blur(20px)' }}
             />
             
-            {/* Main frame canvas */}
+            {/* Main canvas */}
             <div 
                 ref={canvasContainerRef} 
                 className="relative w-full h-[45vh] md:h-full md:absolute md:inset-0 z-0 bg-transparent flex justify-center overflow-hidden shrink-0 shadow-[0_15px_60px_rgba(0,0,0,0.8)] md:shadow-none"
@@ -408,7 +348,7 @@ const CharityScrollSequence = () => {
             {/* Text overlay */}
             <div className="relative w-full h-[55vh] md:h-full md:absolute md:inset-0 z-10 flex flex-col justify-start md:justify-center items-center px-3 md:px-8 py-4 md:py-0 overflow-hidden pointer-events-none shrink-0 border-t border-white/5 md:border-t-0">
                 <AnimatePresence mode="wait">
-                    {showText && activeContent && (
+                    {showText && activeContent && videoReady && (
                         <motion.div
                             key={currentIndex}
                             variants={containerVariants}
@@ -418,18 +358,7 @@ const CharityScrollSequence = () => {
                             className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto w-full pointer-events-auto h-full md:h-auto"
                         >
                             <div 
-                                className={[
-                                    // --- KEY FIX #5: Remove backdrop-blur on mobile — huge GPU saving ---
-                                    // Mobile: solid dark background (no blur, no composite layers)
-                                    // Desktop: keep the premium glass blur effect
-                                    "bg-gradient-to-b from-black/85 via-black/80 to-black/95",
-                                    "md:bg-gradient-to-b md:from-black/80 md:via-black/60 md:to-black/80",
-                                    "md:backdrop-blur-xl",
-                                    "p-6 md:p-16 rounded-[2rem] md:rounded-3xl",
-                                    "border border-white/15 md:border-white/20",
-                                    "shadow-[0_0_50px_rgba(0,0,0,0.8)]",
-                                    "w-full relative overflow-y-auto overflow-x-hidden max-h-full"
-                                ].join(' ')}
+                                className="bg-gradient-to-b from-black/85 via-black/80 to-black/95 md:bg-gradient-to-b md:from-black/80 md:via-black/60 md:to-black/80 md:backdrop-blur-xl p-6 md:p-16 rounded-[2rem] md:rounded-3xl border border-white/15 md:border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] w-full relative overflow-y-auto overflow-x-hidden max-h-full"
                                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                             >
                                 <style dangerouslySetInnerHTML={{__html: `::-webkit-scrollbar { display: none; }`}} />
@@ -470,7 +399,7 @@ const CharityScrollSequence = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Scroll Indicator */}
+            {/* Scroll indicator */}
             <div className="fixed bottom-4 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none opacity-[0.4] md:opacity-50 z-20">
                 <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] text-white mb-2">Scroll</span>
                 <motion.div 
