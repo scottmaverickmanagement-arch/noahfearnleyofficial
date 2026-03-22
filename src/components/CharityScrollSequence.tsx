@@ -18,14 +18,14 @@ const contentStops = [
         button: null 
     },
     { 
-        frame: 145, 
+        frame: 217, 
         category: "Animal Wellness", 
         text: "Together, we have rescued and rehabilitated countless animals. The journey involves dedicated care, medical attention, and safe fostering environments.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 242, 
+        frame: 427, 
         category: "Animal Wellness", 
         text: "Join us in our continuous partnership with Best Friends Animal Society to ensure every pet finds a family.", 
         description: null, 
@@ -33,21 +33,21 @@ const contentStops = [
         link: "https://bestfriends.org/" 
     },
     { 
-        frame: 408, 
+        frame: 675, 
         category: "Environmental Conservation", 
         text: "Protecting our oceans is vital for the future of our planet. Our environmental conservation efforts focus on cleanups and marine life protection.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 550, 
+        frame: 921, 
         category: "Environmental Conservation", 
         text: "By mobilizing communities, we've removed tons of plastic from beaches, restoring habitats and promoting sustainable practices globally.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 682, 
+        frame: 1057, 
         category: "Environmental Conservation", 
         text: "Help us safeguard the oceans by supporting Oceana's critical campaigns.", 
         description: null, 
@@ -55,14 +55,14 @@ const contentStops = [
         link: "https://oceana.org/" 
     },
     { 
-        frame: 835, 
+        frame: 1210, 
         category: "Art & Education", 
         text: "Art and education empower the next generation. We advocate for accessible creative programs in underfunded schools.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 975, 
+        frame: 1350, 
         category: "Art & Education", 
         text: "Our initiatives have provided supplies and scholarships to hundreds of students. Support local creativity.", 
         description: null, 
@@ -70,14 +70,14 @@ const contentStops = [
         link: "https://www.artsforla.org/" 
     },
     { 
-        frame: 1070, 
+        frame: 1445, 
         category: "Children's Hospitals", 
         text: "Bringing hope and advanced care to children fighting severe illnesses. We believe in providing the best medical support and comfort.", 
         description: null, 
         button: null 
     },
     { 
-        frame: 1225, 
+        frame: 1600, 
         category: "Children's Hospitals", 
         text: "Our partnership helps fund life-saving treatments and research. Be a part of the miracle.", 
         description: null, 
@@ -86,9 +86,8 @@ const contentStops = [
     }
 ];
 
-const TOTAL_FRAMES = 1395;
+const TOTAL_FRAMES = 1770;
 const ANIMATION_DURATION = 4.0; // Seconds spent moving between frames
-
 const CharityScrollSequence = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -101,12 +100,44 @@ const CharityScrollSequence = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     
-    // Motion value to track the exact floating point frame
     const motionFrame = useMotionValue(1);
     const [renderedFrame, setRenderedFrame] = useState(1);
     
+    // RAM Management - LRU Sliding Cache
+    const MAX_CACHE_SIZE = 40; 
+    const imageCache = useRef<Map<number, HTMLImageElement>>(new Map());
+
+    const preloadFrames = useCallback((current: number) => {
+        // Enforce max memory cache to stop iOS crashes
+        if (imageCache.current.size > MAX_CACHE_SIZE) {
+            Array.from(imageCache.current.keys()).forEach((key) => {
+                if (Math.abs(key - current) > MAX_CACHE_SIZE / 2) {
+                    const img = imageCache.current.get(key);
+                    if (img) img.src = ""; // Force disconnect source to help GC recycle RAM
+                    imageCache.current.delete(key);
+                }
+            });
+        }
+
+        // Look-ahead fetch the next 15 frames + 5 backwards frames
+        const preloadAhead = 15;
+        const preloadBehind = 5;
+
+        for (let i = Math.max(1, current - preloadBehind); i <= Math.min(TOTAL_FRAMES, current + preloadAhead); i++) {
+            if (!imageCache.current.has(i)) {
+                const img = new Image();
+                img.decoding = 'async';
+                img.src = `/frames_optimized/frame-${i}.webp`;
+                imageCache.current.set(i, img);
+            }
+        }
+    }, []);
+
     useMotionValueEvent(motionFrame, "change", (latest) => {
-        setRenderedFrame(Math.max(1, Math.min(TOTAL_FRAMES, Math.round(latest))));
+        const finalFrame = Math.max(1, Math.min(TOTAL_FRAMES, Math.round(latest)));
+        setRenderedFrame(finalFrame);
+        // Hint the preloader immediately to fetch frames slightly before React unloads the DOM render cycle
+        preloadFrames(finalFrame); 
     });
 
     const goToNext = useCallback(() => {
@@ -216,11 +247,12 @@ const CharityScrollSequence = () => {
         latestRequestIdRef.current += 1;
         const thisRequestId = latestRequestIdRef.current;
 
-        const img = new Image();
-        img.decoding = 'async'; // Offload decoding to prevent main-thread jank
-        img.src = `/frames_optimized/frame-${renderedFrame}.webp`;
+        // Ensure the frame is in the cache mapping
+        preloadFrames(renderedFrame);
+        const img = imageCache.current.get(renderedFrame);
+        if (!img) return;
         
-        img.onload = () => {
+        const drawRoutine = () => {
             // Only discard this frame if a strictly newer requested frame has ALREADY been drawn.
             // This prevents screen tearing (out of order), but allows slightly delayed frames
             // to still draw, completely fixing the frozen screen/stuttering effect!
@@ -235,20 +267,24 @@ const CharityScrollSequence = () => {
             ctx.drawImage(img, 0, 0, img.width, img.height,
                           centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
                           
-            // Draw heavy blur silhouette canvas for mobile background
+            // Draw heavily downsampled silhouette canvas for mobile background
             if (bgCanvas) {
                 const bgCtx = bgCanvas.getContext('2d');
                 if (bgCtx) {
-                    const ratioBg = Math.max(bgCanvas.width / img.width, bgCanvas.height / img.height);
-                    const shiftX = (bgCanvas.width - img.width * ratioBg) / 2;
-                    const shiftY = (bgCanvas.height - img.height * ratioBg) / 2;
+                    // Mobile background doesn't need scaling math, we just stretch it massively across the tiny bounding box, let CSS blur do the rest
                     bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
                     bgCtx.drawImage(img, 0, 0, img.width, img.height,
-                                    shiftX, shiftY, img.width * ratioBg, img.height * ratioBg);
+                                    0, 0, bgCanvas.width, bgCanvas.height);
                 }
             }
         };
-    }, [renderedFrame]);
+
+        if (img.complete) {
+            drawRoutine();
+        } else {
+            img.onload = drawRoutine;
+        }
+    }, [renderedFrame, preloadFrames]);
 
     // Canvas robust resize handling
     useEffect(() => {
@@ -261,10 +297,11 @@ const CharityScrollSequence = () => {
                 canvasRef.current.width = rect.width * dpr;
                 canvasRef.current.height = rect.height * dpr;
                 
-                // Keep the blurry silhouette at a strictly reduced resolution to aggressively save mobile GPU
+                // Keep the blurry silhouette at a strictly reduced micro-resolution to aggressively save mobile GPU
+                // A 16x32 canvas stretched via CSS is natively ultra-blurry and completely eliminates GPU strain!
                 if (bgCanvasRef.current) {
-                    bgCanvasRef.current.width = window.innerWidth * 0.15;
-                    bgCanvasRef.current.height = window.innerHeight * 0.15;
+                    bgCanvasRef.current.width = 16;
+                    bgCanvasRef.current.height = 32;
                 }
                 
                 setRenderedFrame(prev => prev); // triggers re-draw
@@ -311,7 +348,8 @@ const CharityScrollSequence = () => {
             {/* Background Blurry Silhouette for Mobile Bottom Half */}
             <canvas 
                 ref={bgCanvasRef}
-                className="absolute inset-0 w-full h-full object-cover blur-[50px] opacity-70 scale-125 z-0 md:hidden pointer-events-none"
+                className="absolute inset-0 w-full h-full opacity-[0.55] scale-125 z-0 md:hidden pointer-events-none transform-gpu"
+                style={{ imageRendering: 'pixelated', filter: 'blur(20px)' }}
             />
             
             {/* The Animated Frame Canvas (Top view on mobile, Fullscreen view on desktop) */}

@@ -74,18 +74,21 @@ const About = () => {
             <h2 className="font-serif text-3xl md:text-4xl font-bold mb-8">Beyond the Screen</h2>
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p>
-                Off-screen, Noah is a man of depth and authenticity. Married to Aalayah Buie, he values family above all —
-                spending quality time with his brother, sister-in-law, and loved ones. His daily fitness routine reflects the
-                discipline that carried him from sports to stardom.
+                Off-screen, Noah is a man of depth and authenticity. He remains deeply connected to his roots,
+                balancing his demanding acting work with an array of personal hobbies and cherishing time spent
+                with his family and close friends. His daily life is a reflection of the same discipline and
+                dedication that carried him from the football field to stardom.
               </p>
               <p>
-                A true enthusiast at heart, Noah is in the midst of restoring a 1968 Ford Mustang — a project that mirrors
-                his approach to acting: patience, precision, and a reverence for the craft. He believes in soul over
+                An active advocate for health and giving back, Noah channels his drive into rigorous physical
+                training and philanthropic efforts. This commitment mirrors his approach to acting: it requires
+                patience, precision, and an unyielding reverence for the craft. He firmly believes in soul over
                 superficiality, work ethic over shortcuts, and consistency over overnight success.
               </p>
               <p>
-                Trained at Tampa's Actors School, Michael Woolson's On-Camera Course, and Lesly Kahn's renowned Comedy
-                Intensive, Noah brings a rare combination of formal training and raw natural talent to every role he takes on.
+                Having honed his skills at Tampa's Actors School, Michael Woolson's On-Camera Course, and Lesly Kahn's
+                renowned Comedy Intensive, Noah brings a rare combination of formal training and raw, natural talent
+                to every character he embodies.
               </p>
             </div>
           </ScrollReveal>
