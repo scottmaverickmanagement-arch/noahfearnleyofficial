@@ -27,7 +27,7 @@ const FanClub = () => {
     const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nI would like to join the Noah Fearnley Fan Club. Please send me instructions.`);
 
     // Open email client
-    window.location.href = `mailto:management@noahfearnleyofficial.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:fanclub@noahfearnleyofficial.com?subject=${subject}&body=${body}`;
 
     // Show success state
     setIsSubmitted(true);
@@ -107,7 +107,7 @@ const FanClub = () => {
                   Fill out the form below to initiate an email to our management team.
                   <br /><br />
                   <span className="text-primary font-medium">What happens next?</span> You will receive a reply from
-                  <span className="font-mono text-xs mx-1 p-1 bg-primary/10 rounded">management@noahfearnleyofficial.com</span>
+                  <span className="font-mono text-xs mx-1 p-1 bg-primary/10 rounded">fanclub@noahfearnleyofficial.com</span>
                   with your unique access link and instructions.
                 </p>
 
