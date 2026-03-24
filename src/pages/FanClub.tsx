@@ -15,22 +15,37 @@ const benefits = [
 
 import heroImage from "@/assets/hero-updated.jpg";
 
+const EDGE_FUNCTION_URL = "https://jpolzhazmiwbbvqwkbxw.supabase.co/functions/v1/send-fanclub-email";
+
 const FanClub = () => {
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-    // Construct mailto link
-    const subject = encodeURIComponent("Fan Club Registration Request");
-    const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nI would like to join the Noah Fearnley Fan Club. Please send me instructions.`);
+    try {
+      const res = await fetch(EDGE_FUNCTION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: formData.name, email: formData.email }),
+      });
 
-    // Open email client
-    window.location.href = `mailto:fanclub@noahfearnleyofficial.com?subject=${subject}&body=${body}`;
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Something went wrong. Please try again.");
+      }
 
-    // Show success state
-    setIsSubmitted(true);
+      setIsSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,12 +100,12 @@ const FanClub = () => {
                 <div className="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <ArrowRight className="w-8 h-8" />
                 </div>
-                <h3 className="font-serif text-xl font-bold mb-2">Request Sent!</h3>
+                <h3 className="font-serif text-xl font-bold mb-2">Application Received!</h3>
                 <p className="text-muted-foreground mb-4">
-                  Your email app should have opened. Please send the email to complete your request.
+                  A confirmation email with next steps has been sent to your inbox.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Once sent, our management team will review your details and reply with official instructions and links to the fan club platform.
+                  Our management team will review your details and reply with official instructions and your Fan Club ID card.
                 </p>
                 <Button
                   variant="outline"
@@ -103,13 +118,19 @@ const FanClub = () => {
             ) : (
               <>
                 <p className="text-center text-muted-foreground mb-8 text-sm leading-relaxed">
-                  To ensure the exclusivity and security of our community, joining is a two-step process.
-                  Fill out the form below to initiate an email to our management team.
+                  To ensure the exclusivity and security of our community, membership is by application only.
+                  Fill out the form below to apply.
                   <br /><br />
-                  <span className="text-primary font-medium">What happens next?</span> You will receive a reply from
-                  <span className="font-mono text-xs mx-1 p-1 bg-primary/10 rounded">fanclub@noahfearnleyofficial.com</span>
-                  with your unique access link and instructions.
+                  <span className="text-primary font-medium">What happens next?</span> You will receive an email from
+                  <span className="font-mono text-xs mx-1 p-1 bg-primary/10 rounded">fanclub@fanclub.noahfearnleyofficial.com</span>
+                  with your next steps and instructions.
                 </p>
+
+                {error && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+                    {error}
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
@@ -136,8 +157,8 @@ const FanClub = () => {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
-                    Join the Fan Club <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                    {isLoading ? "Submitting..." : "Join the Fan Club"} {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                   <p className="text-muted-foreground text-xs text-center">
                     By joining, you agree to our Terms of Service and Privacy Policy.
