@@ -1,17 +1,21 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ScrollReveal from "@/components/ScrollReveal";
 import BackgroundSlideshow from "@/components/BackgroundSlideshow";
+import { useSEO } from "@/hooks/useSEO";
 import heroImage from "@/assets/hero-updated.jpg"; // User-specified hero image from GitHub
 
-import mercyPoster from "@/assets/posters/mercy-2026.jpg";
+import loveStoryPoster from "@/assets/posters/love-story-poster.jpg";
+import loveStoryVideo from "@/assets/videos/love-story-trailer.mp4";
 
 const newsPreview = [
-  { date: "Jan 15, 2026", title: "Noah Joins Cast of 'Mercy' with Chris Pratt", excerpt: "Exciting news as Noah lands a role alongside Chris Pratt in the highly anticipated thriller 'Mercy,' set for theatrical release in 2026." },
-  { date: "Dec 8, 2025", title: "FX Announces 'Love Story' Series", excerpt: "Noah has been cast as Michael Bergin in the upcoming FX drama series 'Love Story,' a gripping biographical series." },
-  { date: "Nov 20, 2025", title: "Upcoming Fan Meet-and-Greet Events", excerpt: "Get ready for exclusive meet-and-greet events in Los Angeles and New York. Fan club members get priority access." },
+  { date: "Mar 24, 2026", title: "'Love Story' Season Finale Airs March 26th", excerpt: "Don't miss the gripping season finale of FX's 'Love Story' this Thursday. Noah's performance as Michael Bergin has been hailed as career-defining." },
+  { date: "Mar 22, 2026", title: "Noah Partners with Local Youth Theatre", excerpt: "Noah is giving back to his roots in Orange, CT, by hosting acting workshops for young aspiring performers this summer." },
+  { date: "Mar 16, 2026", title: "Recap: Fans Gather for Exclusive LA Meet & Greet", excerpt: "A huge thank you to everyone who joined Noah in LA on March 15th! It was an incredible afternoon of connecting with the fan club community." },
 ];
 
 import verticalPlaceholder from "@/assets/posters/vertical-placeholder.jpg";
@@ -26,11 +30,18 @@ const verticalDramasPreview = [
 ];
 
 const Index = () => {
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
+  useSEO({
+    title: "Noah Fearnley Official Website – Vertical Dramas, Movies & Love Story",
+    description: "Welcome to the official website of actor Noah Fearnley. Explore his latest projects like 'Love Story,' iconic vertical dramas, and connect with his fan club."
+  });
+
   return (
     <>
       {/* Fixed Hero Background */}
       <div className="fixed inset-0 -z-50">
-        <img src={heroImage} alt="Noah Fearnley" className="w-full h-full object-cover" />
+        <img src={heroImage} alt="Noah Fearnley - Official Actor Website Hero" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
       </div>
 
@@ -60,8 +71,8 @@ const Index = () => {
           <ScrollReveal>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               Noah Fearnley, the charismatic actor from Orange, Connecticut, is captivating audiences with his versatile
-              performances in micro-dramas, TV movies, and upcoming blockbusters. From ReelShort hits to Hollywood's
-              biggest screens, Noah's journey is one of resilience, passion, and undeniable talent.
+              performances in micro-dramas, TV movies, and upcoming blockbusters. Backed by a strong support system including
+              his best friend fellow actor Arnold Fabian, Noah's journey is one of resilience, passion, and undeniable talent.
             </p>
           </ScrollReveal>
         </div>
@@ -72,25 +83,57 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <ScrollReveal>
-              <Card className="bg-card border-border overflow-hidden group cursor-pointer hover:border-primary/30 transition-colors h-full">
-                <div className="aspect-[2/3] md:aspect-[16/9] relative overflow-hidden">
+              <Card className="bg-card border-border overflow-hidden group cursor-pointer hover:border-primary/30 transition-colors h-full relative">
+                <div className="aspect-[2/3] md:aspect-[16/9] relative overflow-hidden bg-black">
+                  {/* Poster Image */}
                   <img
-                    src={mercyPoster}
-                    alt="Mercy Movie Poster"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src={loveStoryPoster}
+                    alt="Noah Fearnley in Love Story (2026) - Official Poster"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:opacity-0 transition-opacity"
                   />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                  
+                  {/* Hover/Click Video */}
+                  <video
+                    src={loveStoryVideo}
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity"
+                    loop
+                    playsInline
+                    onMouseOver={(e) => {
+                      e.currentTarget.play().catch(err => {
+                        console.log("Autoplay with sound blocked:", err);
+                        // Fallback to muted if blocked
+                        e.currentTarget.muted = true;
+                        e.currentTarget.play();
+                      });
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedVideo(loveStoryVideo);
+                    }}
+                  />
+
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors pointer-events-none" />
                 </div>
                 <CardContent className="p-6">
-                  <p className="text-primary text-xs uppercase tracking-[0.2em] mb-2">Coming 2026</p>
-                  <h3 className="font-serif text-2xl font-bold mb-3">Mercy</h3>
+                  <p className="text-primary text-xs uppercase tracking-[0.2em] mb-2 font-bold flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
+                    Trending 2026 Series
+                  </p>
+                  <h3 className="font-serif text-2xl font-bold mb-3">Love Story</h3>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Noah's theatrical debut alongside Chris Pratt in this gripping thriller. A story of survival, justice,
-                    and the lengths one will go to protect what matters most.
+                    Noah stars as Michael Bergin in the highly anticipated FX biographical series 'Love Story,' exploring the 
+                    iconic and tragic romance of John F. Kennedy Jr. and Carolyn Bessette.
                   </p>
                   <Button variant="outline" asChild>
-                    <a href="https://www.imdb.com/title/tt31193158/" target="_blank" rel="noopener noreferrer">
-                      View on IMDB <ArrowRight className="ml-2 h-3 w-3" />
+                    <a href="https://www.fxnetworks.com/shows/american-love-story" target="_blank" rel="noopener noreferrer">
+                      Official FX Site <ArrowRight className="ml-2 h-3 w-3" />
                     </a>
                   </Button>
                 </CardContent>
@@ -107,7 +150,7 @@ const Index = () => {
                         <div className="rounded overflow-hidden relative aspect-[3/4] hover:ring-2 hover:ring-primary/50 transition-all h-full">
                           <img
                             src={drama.image}
-                            alt={drama.title}
+                            alt={`Noah Fearnley in ${drama.title} - Vertical Drama Poster`}
                             className="w-full h-full object-cover"
                           />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -177,6 +220,19 @@ const Index = () => {
           </ScrollReveal>
         </div>
       </section>
+      {/* Video Modal */}
+      <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
+        <DialogContent className="sm:max-w-[80vw] p-0 bg-black border-none overflow-hidden">
+          <div className="aspect-video w-full">
+            <video
+              src={selectedVideo || ""}
+              className="w-full h-full"
+              controls
+              autoPlay
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -1,0 +1,57 @@
+Since it’s an **official** Noah Fearnley site, you want Google to treat it as the primary, most trustworthy result for his name and for fan interactions. [seodiscovery](https://www.seodiscovery.com/celebrity-seo.php)
+
+## 1. Lock in “official” signals
+
+- Use his full name in the domain if possible, like `noahfearnley.com` or `officialnoahfearnley.com`, and mention “official website” in the homepage title and intro. [npr](https://www.npr.org/sections/npr-training/2025/05/29/g-s1-64712/build-your-audience-with-seo-descriptions-and-custom-urls)
+- Make all verified social profiles (Instagram, TikTok, X, YouTube, ReelShort, IMDb, etc.) link back to this site and call it “Noah Fearnley – Official Website” in their bios. [amplewebsol](https://amplewebsol.com/seo-for-celebrities/)
+- On the homepage, clearly state something like “Welcome to the official website of actor Noah Fearnley” in the first paragraph so Google and fans both see the authority. [seodiscovery](https://www.seodiscovery.com/celebrity-seo.php)
+
+## 2. Structure the site around fan intent
+
+Design key pages around what your specific audiences are searching for. [allianceinteractive](https://www.allianceinteractive.com/blog/best-athlete-website-examples/)
+
+- Homepage: “Noah Fearnley – Official Site | Vertical Dramas, Movies & Fan Events” with sections for bio, latest projects, and “Connect with Noah”. [seodiscovery](https://www.seodiscovery.com/celebrity-seo.php)  
+- About page: biography plus “Noah Fearnley age, background, roles” type info, written in a respectful, official tone. [amplewebsol](https://amplewebsol.com/seo-for-celebrities/)
+- Projects pages:  
+  - “Vertical Dramas & ReelShorts” (title and H1 mentioning “Noah Fearnley vertical dramas / ReelShort series”). [business.ticketmaster](https://business.ticketmaster.ie/mastering-seo-boost-ticket-sales-and-fan-engagement/)
+  - “Movies & Series” (for traditional film/TV fans). [allianceinteractive](https://www.allianceinteractive.com/blog/best-athlete-website-examples/)
+- Fan connection page: “Meet Noah Fearnley – Official Fan Calls, Events & Q&A” explaining how fans can talk to him, join lives, attend events, or book virtual meet‑and‑greets. [business.ticketmaster](https://business.ticketmaster.ie/mastering-seo-boost-ticket-sales-and-fan-engagement/)
+
+Make URLs clean and descriptive, like `/about`, `/vertical-dramas`, `/movies-series`, `/fan-events`, `/contact-noah`. [npr](https://www.npr.org/sections/npr-training/2025/05/29/g-s1-64712/build-your-audience-with-seo-descriptions-and-custom-urls)
+
+## 3. On‑page SEO tuned to your audiences
+
+Write titles and content using the language your target fans actually type into search. [npr](https://www.npr.org/sections/npr-training/2025/05/29/g-s1-64712/build-your-audience-with-seo-descriptions-and-custom-urls)
+
+For example:
+
+- Homepage title tag: “Noah Fearnley Official Website – Vertical Dramas, Movies & Meet‑and‑Greets”. [seodiscovery](https://www.seodiscovery.com/celebrity-seo.php)
+- Fan events page title: “Meet Noah Fearnley – Official Fan Events, Video Calls & Live Q&A”. [business.ticketmaster](https://business.ticketmaster.ie/mastering-seo-boost-ticket-sales-and-fan-engagement/)
+- Vertical drama page title: “Noah Fearnley Vertical Dramas & ReelShort Series – Official Guide”. [amplewebsol](https://amplewebsol.com/seo-for-celebrities/)
+
+On each page:
+
+- Use the main phrase in the H1 (“Meet Noah Fearnley”, “Noah Fearnley Vertical Dramas”), in the first paragraph, and a few sub‑headings, but keep it natural. [npr](https://www.npr.org/sections/npr-training/2025/05/29/g-s1-64712/build-your-audience-with-seo-descriptions-and-custom-urls)
+- Speak to mostly female millennials and older fans: emphasize story, emotions, character relationships, comfort‑watch and “para‑social” connection. [embryo](https://embryo.com/seo/the-messy-middle/audience-personas-seo-strategy/)
+- Add internal links like “Want to talk with Noah? Visit the fan events page” or “See all of Noah’s vertical dramas here” so users and Google clearly see how pages connect. [seodiscovery](https://www.seodiscovery.com/celebrity-seo.php)
+
+## 4. Use structured data as an official person site
+
+Help Google understand this is the official site for a real person using Person schema markup. [seo-hacker](https://seo-hacker.com/how-to-add-person-schema/)
+
+- On the About or homepage, add JSON‑LD Person schema including:  
+  - `@type: "Person"`, `name: "Noah Fearnley"`, `url` (official site URL), `image` (official headshot), `jobTitle` (e.g., “Actor”), and social links in `sameAs`. [schema](https://schema.org/Person)
+- If you list events (fan meets, live Q&A), consider Event schema on those event pages so they can surface more prominently. [wpschema](https://wpschema.com/docs/add-schema-markup-for-a-person/)
+
+This makes it easier for Google to show rich results and connect the official site with profiles and any future knowledge panels. [seo-hacker](https://seo-hacker.com/how-to-add-person-schema/)
+
+## 5. Build fan‑driven content and links
+
+You grow search visibility by having real fan activity and reputable sites pointing at you. [freestar](https://freestar.com/seo-tips-for-celebrity-news-sites/)
+
+- Post “News & Updates” or blog items: new drama announcements, behind‑the‑scenes stories, fan Q&A recaps, etc., which create many long‑tail searches. [freestar](https://freestar.com/seo-tips-for-celebrity-news-sites/)
+- Direct fans from socials to specific pages (like “Meet Noah” or “Vertical Dramas”) in link‑in‑bio and story swipe‑ups. [business.ticketmaster](https://business.ticketmaster.ie/mastering-seo-boost-ticket-sales-and-fan-engagement/)
+- When possible, get features on entertainment blogs, interviews, or reviews for his shows, and ask them to link to the official site using his name in the anchor text. [freestar](https://freestar.com/seo-tips-for-celebrity-news-sites/)
+- Encourage fan communities (Discord, Facebook groups, TikTok fan pages) to reference and link to the official site as the source for accurate info and event details. [telecoming](https://www.telecoming.com/blog/strategies-for-building-and-monetizing-fan-communities/)
+
+If you tell me what pages you’ve already built or plan to build, I can draft SEO‑ready title tags, H1s, and first paragraphs specifically for each Noah Fearnley page.

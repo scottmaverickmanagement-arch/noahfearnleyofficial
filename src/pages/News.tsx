@@ -4,6 +4,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ScrollReveal from "@/components/ScrollReveal";
+import { useSEO } from "@/hooks/useSEO";
 // import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 
@@ -18,15 +19,20 @@ import { format } from "date-fns";
 // }
 
 const articles = [
+  { date: "Mar 24, 2026", title: "'Love Story' Season Finale Airs March 26th on FX", excerpt: "The gripping season finale of FX's 'Love Story' is set to air this Thursday, March 26th. Noah Fearnley's performance as Michael Bergin has been hailed as a career-defining turn in this season's most talked-about biographical drama.", category: "TV", source: "FX", url: "https://www.fxnetworks.com/shows/american-love-story" },
+  { date: "Mar 22, 2026", title: "Noah Partners with Local Youth Theatre for Workshops", excerpt: "Actor Noah Fearnley is giving back to his roots by partnering with a youth theatre in Orange, Connecticut, to host a series of acting workshops this summer. \"It's about fostering the next generation of storytellers,\" says Noah.", category: "Community", source: "Local News", url: "https://www.orangect.gov/644/Youth-Services" },
+  { date: "Mar 16, 2026", title: "Recap: Fans Gather for Exclusive LA Meet & Greet", excerpt: "Thank you to everyone who joined Noah at the exclusive meet-and-greet event in Los Angeles on March 15th! It was an incredible afternoon of stories, photos, and connecting with the fan club community. Stay tuned for New York dates!", category: "Events", source: "Official", url: "/fan-club" },
+  { date: "Mar 10, 2026", title: "New Fan Club Perks: Exclusive Behind-the-Scenes Digital Gallery", excerpt: "We are excited to launch a new digital gallery for our Gold and Platinum fan club members. Get an exclusive look at never-before-seen set photos from Noah's upcoming projects and personal restoration work.", category: "Fan Club", source: "Official", url: "/fan-club" },
+  { date: "Mar 1, 2026", title: "Mustang Restoration: The Final Chapter", excerpt: "The 1968 Mustang restoration is nearly complete! Noah shares the penultimate update on his YouTube channel, detailing the intricate engine work and custom interior finishings.", category: "Personal", source: "YouTube", url: "https://www.youtube.com/@noahfearnleyy" },
+  { date: "Feb 28, 2026", title: "Noah Shares Passion for Coastal Conservation", excerpt: "In a recent interview, Noah discussed his deep connection to the Connecticut coast and his involvement in local ocean conservation efforts. \"Protecting our shorelines is a cause close to my heart,\" he shared.", category: "Personal", source: "Instagram", url: "https://www.instagram.com/noahfearnleyy/" },
   { date: "Jan 15, 2026", title: "Noah Joins Cast of 'Mercy' with Chris Pratt", excerpt: "In what marks his theatrical debut, Noah Fearnley has been cast in 'Mercy,' a gripping thriller starring Chris Pratt. The film, set for a 2026 release, follows a story of survival and justice that pushes its characters to their limits.", category: "Film", source: "Deadline", url: "https://deadline.com/2026/01/chris-pratt-mercy-movie-noah-fearnley-cast-1235123456/" },
-  { date: "Dec 8, 2025", title: "FX Announces 'Love Story' Series Starring Noah Fearnley", excerpt: "FX has officially announced 'Love Story,' a biographical drama series where Noah will portray model-actor Michael Bergin. Production begins early 2026 with a star-studded ensemble cast.", category: "TV", source: "Variety", url: "https://variety.com/2025/tv/news/fx-love-story-cast-noah-fearnley-michael-bergin-1235567890/" },
-  { date: "Nov 20, 2025", title: "Exclusive Fan Meet-and-Greet Events Announced", excerpt: "Noah is thrilled to announce a series of exclusive fan meet-and-greet events in Los Angeles and New York. Fan club members will receive priority access and VIP treatment.", category: "Events", source: "Official", url: "/fan-club" },
-  { date: "Oct 5, 2025", title: "Noah Reaches 50+ Vertical Drama Credits", excerpt: "With his latest ReelShort productions, Noah has now starred in over 50 vertical micro-dramas, cementing his status as one of the platform's most prolific and beloved actors.", category: "Career", source: "ReelShort", url: "https://www.reelshort.com/" },
-  { date: "Sep 12, 2025", title: "'Mother's Deadly Son' Premiere on Lifetime", excerpt: "Noah's latest Lifetime film 'Mother's Deadly Son' premiered to strong ratings. Critics praise his nuanced performance as a son caught in a web of psychological manipulation.", category: "Film", source: "Lifetime", url: "https://www.mylifetime.com/movies/mothers-deadly-son" },
-  { date: "Aug 1, 2025", title: "Behind the Scenes: Restoring a 1968 Mustang", excerpt: "In a personal blog post, Noah shares his journey restoring a classic 1968 Ford Mustang — drawing parallels between the patience required in restoration and in building an acting career.", category: "Personal", source: "Instagram", url: "https://www.instagram.com/noahfearnleyy/" },
 ];
 
 const News = () => {
+  useSEO({
+    title: "Noah Fearnley Latest News – Film Roles, TV & Professional Updates",
+    description: "Stay updated with actor Noah Fearnley's latest career news, film role announcements, and fan club updates."
+  });
   // const [articles, setArticles] = useState<Article[]>([]);
   // const [loading, setLoading] = useState(true);
 

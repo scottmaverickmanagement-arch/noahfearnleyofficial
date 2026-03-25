@@ -20,7 +20,7 @@ const socials = [
   { icon: Instagram, href: "https://www.instagram.com/noahfearnleyy/", label: "Instagram" },
   { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61587444625116", label: "Facebook" },
   { icon: Youtube, href: "https://youtube.com", label: "YouTube" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
+  { icon: Twitter, href: "https://x.com/noahfearnley_?s=20", label: "Twitter" },
 ];
 
 const Header = () => {

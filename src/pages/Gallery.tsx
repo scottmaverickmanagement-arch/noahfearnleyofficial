@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import ScrollReveal from "@/components/ScrollReveal";
 import { cn } from "@/lib/utils";
+import { useSEO } from "@/hooks/useSEO";
 
 // Dynamically import all gallery images and videos
 const videoModules = import.meta.glob("../assets/videos/*.mp4", { eager: true });
@@ -14,6 +15,11 @@ import BackgroundSlideshow from "@/components/BackgroundSlideshow";
 const categories = ["All", "Photos", "Videos"] as const;
 
 const Gallery = () => {
+  useSEO({
+    title: "Noah Fearnley Portfolio – Photos & Behind-the-Scenes Videos",
+    description: "A professional collection of photos, project highlights, and behind-the-scenes moments from Noah Fearnley."
+  });
+
   const [filter, setFilter] = useState<string>("All");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -74,7 +80,7 @@ const Gallery = () => {
                     >
                       <img
                         src={src}
-                        alt={`Gallery image ${i + 1}`}
+                        alt={`Noah Fearnley - Professional Photo & Project Highlight ${i + 1}`}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -135,7 +141,7 @@ const Gallery = () => {
             {selectedImage && (
               <img
                 src={selectedImage}
-                alt="Full screen"
+                alt="Noah Fearnley - High Resolution Portfolio Image"
                 className="max-w-full max-h-[85vh] rounded-md shadow-2xl object-contain bg-black"
               />
             )}

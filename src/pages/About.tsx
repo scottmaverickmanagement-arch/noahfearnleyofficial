@@ -1,4 +1,5 @@
 import ScrollReveal from "@/components/ScrollReveal";
+import { useSEO } from "@/hooks/useSEO";
 
 const milestones = [
   { year: "1999", title: "Born in Orange, CT", description: "Noah Fearnley is born on June 28, 1999, in Orange, Connecticut. Standing at 6'2\" with an athletic build, brown hair, and striking blue eyes." },
@@ -6,23 +7,30 @@ const milestones = [
   { year: "2017–22", title: "Training & Craft", description: "Trains rigorously at Tampa's Actors School, Michael Woolson's On-Camera Course, and Lesly Kahn's Comedy Intensive. Moves to Hollywood to pursue acting full-time." },
   { year: "2023", title: "ReelShort Breakthrough", description: "Begins starring in vertical micro-dramas on ReelShort, quickly building a following with captivating performances across 50+ titles." },
   { year: "2024", title: "TV Debut", description: "Debuts as Sam Hitchens in 'Morgan's Secret Admirer.' Lands leading roles in Lifetime films including 'Black Girl Missing' and 'Mother's Deadly Son.'" },
-  { year: "2025–26", title: "Hollywood Calling", description: "Cast in the theatrical film 'Mercy' alongside Chris Pratt, and as Michael Bergin in FX's 'Love Story.' The journey from vertical dramas to the big screen is complete." },
+  { year: "2025–26", title: "Hollywood Calling", description: "Cast in the theatrical film 'Mercy' alongside Chris Pratt, and as Michael Bergin in FX's 'Love Story.' Frequently supported by his best friend and fellow actor Arnold Fabian, who joined him for the pivotal New York City premiere of 'Love Story' in early 2026." },
 ];
 
 import aboutVideo from "@/assets/about-background.mp4"; // Import the video
 
 const About = () => {
+  useSEO({
+    title: "About Noah Fearnley – Biography, Roles & Background",
+    description: "Learn about Noah Fearnley's journey from Orange, CT to Hollywood. Actor, model, and rising star known for vertical dramas and upcoming theatrical releases."
+  });
+
   return (
     <>
       {/* Fixed Video Background */}
       <div className="fixed inset-0 -z-50">
         <video
           src={aboutVideo}
-          className="w-full h-full object-cover opacity-60" // Reduced opacity slightly for better blend
+          className="w-full h-full object-cover opacity-60"
           autoPlay
           muted
           loop
           playsInline
+          aria-hidden="true"
+          title="Noah Fearnley - Behind the Scenes Background Video"
         />
         <div className="absolute inset-0 bg-background/90" /> {/* Increased tint opacity for better readability */}
       </div>
@@ -31,7 +39,7 @@ const About = () => {
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <ScrollReveal>
             <p className="text-primary uppercase tracking-[0.3em] text-sm mb-4">About</p>
-            <h1 className="font-serif text-4xl md:text-6xl font-bold mb-6">The Story So Far</h1>
+            <h1 className="font-serif text-4xl md:text-6xl font-bold mb-6 text-primary">Biography</h1>
             <p className="text-muted-foreground text-lg">
               From the football fields of Connecticut to Hollywood's biggest sets — a journey defined by resilience,
               passion, and an unwavering belief that every setback is a setup for a comeback.
@@ -76,8 +84,9 @@ const About = () => {
               <p>
                 Off-screen, Noah is a man of depth and authenticity. He remains deeply connected to his roots,
                 balancing his demanding acting work with an array of personal hobbies and cherishing time spent
-                with his family and close friends. His daily life is a reflection of the same discipline and
-                dedication that carried him from the football field to stardom.
+                with his family and his closest friend, fellow actor Arnold Fabian. Often seen together on
+                social media and at major industry events, Arnold has been a steady figure of support throughout 
+                Noah's transition from vertical dramas to mainstream Hollywood success.
               </p>
               <p>
                 An active advocate for health and giving back, Noah channels his drive into rigorous physical

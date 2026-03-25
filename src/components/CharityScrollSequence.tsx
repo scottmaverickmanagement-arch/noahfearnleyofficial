@@ -408,9 +408,15 @@ const CharityScrollSequence = () => {
                                     </motion.p>
                                 )}
                                 
-                                <motion.h2 variants={itemVariants} className={`font-serif text-white drop-shadow-2xl mb-3 md:mb-6 leading-[1.15] md:leading-[1.1] tracking-wide ${currentIndex === 0 ? 'text-[28px] md:text-7xl font-bold' : 'text-[22px] md:text-5xl'}`}>
-                                    {activeContent.text}
-                                </motion.h2>
+                                {currentIndex === 0 ? (
+                                    <motion.h1 variants={itemVariants} className="font-serif text-white drop-shadow-2xl mb-3 md:mb-6 leading-[1.15] md:leading-[1.1] tracking-wide text-[28px] md:text-7xl font-bold">
+                                        {activeContent.text}
+                                    </motion.h1>
+                                ) : (
+                                    <motion.h2 variants={itemVariants} className="font-serif text-white drop-shadow-2xl mb-3 md:mb-6 leading-[1.15] md:leading-[1.1] tracking-wide text-[22px] md:text-5xl">
+                                        {activeContent.text}
+                                    </motion.h2>
+                                )}
                                 
                                 {activeContent.description && (
                                     <motion.p variants={itemVariants} className="text-muted-foreground/90 text-[13px] md:text-xl font-light mb-5 md:mb-8 mx-auto max-w-2xl leading-[1.6] md:leading-relaxed">

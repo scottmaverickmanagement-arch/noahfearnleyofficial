@@ -3,9 +3,15 @@ import { Mail, Instagram, Facebook, Youtube, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useSEO } from "@/hooks/useSEO";
 import ScrollReveal from "@/components/ScrollReveal";
 
 const Contact = () => {
+  useSEO({
+    title: "Contact Noah Fearnley – Official Management & Press Inquiries",
+    description: "Official contact page for Noah Fearnley. For inquiries, collaborations, or press requests, please reach out to his management team."
+  });
+
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,7 +68,7 @@ const Contact = () => {
             <ScrollReveal delay={0.1}>
               <div className="space-y-8">
                 <div>
-                  <h3 className="font-serif text-xl font-semibold mb-3">Management & Press</h3>
+                  <h2 className="font-serif text-xl font-semibold mb-3">Management & Press</h2>
                   <a href="mailto:management@noahfearnleyofficial.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
                     <Mail className="h-4 w-4" />
                     management@noahfearnleyofficial.com
@@ -70,13 +76,13 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-serif text-xl font-semibold mb-3">Follow Noah</h3>
+                  <h2 className="font-serif text-xl font-semibold mb-3">Follow Noah</h2>
                   <div className="flex flex-col gap-3">
                     {[
                       { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/noahfearnleyy/" },
                       { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/profile.php?id=61587444625116" },
                       { icon: Youtube, label: "YouTube", href: "https://youtube.com" },
-                      { icon: Twitter, label: "Twitter / X", href: "https://twitter.com" },
+                      { icon: Twitter, label: "Twitter / X", href: "https://x.com/noahfearnley_?s=20" },
                     ].map((s) => (
                       <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
                         <s.icon className="h-4 w-4" /> {s.label}

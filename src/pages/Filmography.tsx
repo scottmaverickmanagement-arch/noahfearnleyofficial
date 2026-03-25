@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import ScrollReveal from "@/components/ScrollReveal";
+import { useSEO } from "@/hooks/useSEO";
 
 // Import posters
 // Movies
@@ -240,7 +241,7 @@ const ProjectCard = ({ project, aspectRatio = "aspect-[3/4]" }: { project: Proje
             <div className={`${aspectRatio} relative overflow-hidden`}>
               <img
                 src={project.image}
-                alt={project.title}
+                alt={`Noah Fearnley in ${project.title} - Official Poster`}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -280,7 +281,7 @@ const ProjectCard = ({ project, aspectRatio = "aspect-[3/4]" }: { project: Proje
         <div className="aspect-video w-full overflow-hidden rounded-md border border-border/50 relative">
           <img
             src={project.image}
-            alt={project.title}
+            alt={`Noah Fearnley - ${project.title} Film Detail`}
             className="w-full h-full object-cover blur-sm opacity-50"
           />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -307,14 +308,19 @@ const ProjectCard = ({ project, aspectRatio = "aspect-[3/4]" }: { project: Proje
 );
 
 const Filmography = () => {
+  useSEO({
+    title: "Noah Fearnley Vertical Dramas & Movies – Official Guide",
+    description: "Explore Noah Fearnley's complete filmography, including hit ReelShort vertical dramas, TV movies, and upcoming blockbusters."
+  });
+
   return (
     <section id="filmography" className="section-padding bg-background/50">
       <div className="container mx-auto px-6">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
+            <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4">
               Filmography
-            </h2>
+            </h1>
             <div className="w-20 h-1 bg-primary mx-auto rounded-full mb-6"></div>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               A collection of Long-Format Movies, TV Series, and Short-Form Vertical Dramas.

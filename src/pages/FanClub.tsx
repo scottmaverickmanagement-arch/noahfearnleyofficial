@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import ScrollReveal from "@/components/ScrollReveal";
+import { useSEO } from "@/hooks/useSEO";
 
 const benefits = [
   { icon: Lock, title: "Exclusive Access", desc: "Members-only content, behind-the-scenes footage, and personal updates directly from Noah." },
@@ -18,6 +19,11 @@ import heroImage from "@/assets/hero-updated.jpg";
 const EDGE_FUNCTION_URL = "https://jpolzhazmiwbbvqwkbxw.supabase.co/functions/v1/send-fanclub-email";
 
 const FanClub = () => {
+  useSEO({
+    title: "Meet Noah Fearnley – Official Fan Calls, Events & Q&A",
+    description: "Join the official Noah Fearnley Fan Club for exclusive access to meet-and-greets, private calls, and signed memorabilia."
+  });
+
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
