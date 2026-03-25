@@ -1,9 +1,39 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Youtube, Twitter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("https://jpolzhazmiwbbvqwkbxw.supabase.co/functions/v1/subscribe-newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to subscribe");
+
+      setIsSubmitted(true);
+      setEmail("");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-16">
@@ -33,11 +63,41 @@ const Footer = () => {
 
           <div>
             <h4 className="font-semibold mb-4 uppercase tracking-[0.15em] text-xs">Stay Updated</h4>
-            <p className="text-muted-foreground text-sm mb-3">Get the latest news and updates.</p>
-            <form onSubmit={(e) => e.preventDefault()} className="flex gap-2">
-              <Input placeholder="Your email" type="email" className="bg-background" />
-              <Button type="submit">Subscribe</Button>
-            </form>
+            
+            {isSubmitted ? (
+              <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                <p className="text-sm font-medium text-primary mb-1">Success!</p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  Thank you for subscribing to our newsletter. You've been successfully added to our mailing list.
+                </p>
+                <button 
+                  onClick={() => setIsSubmitted(false)}
+                  className="mt-3 text-[10px] uppercase tracking-wider font-bold text-primary hover:underline"
+                >
+                  Subscribe another email
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="text-muted-foreground text-sm mb-3">Get the latest news and updates.</p>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Your email" 
+                      type="email" 
+                      className="bg-background"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? "..." : "Subscribe"}
+                    </Button>
+                  </div>
+                  {error && <p className="text-red-400 text-[10px] mt-1">{error}</p>}
+                </form>
+              </>
+            )}
           </div>
         </div>
 
@@ -52,7 +112,7 @@ const Footer = () => {
               { icon: Instagram, href: "https://www.instagram.com/noahfearnleyy/" },
               { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61587444625116" },
               { icon: Youtube, href: "#" },
-              { icon: Twitter, href: "#" },
+              { icon: Twitter, href: "https://x.com/noahfearnley_?s=20" },
             ].map((social, i) => (
               <a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <social.icon className="h-4 w-4" />
