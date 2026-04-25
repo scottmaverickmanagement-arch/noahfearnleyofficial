@@ -26,10 +26,18 @@ const events = [
     title: "Sneak Peek: 'Deep Water'", 
     date: "April 10, 2026", 
     location: "Online Exclusive (Fan Club)", 
-    description: "Get an exclusive first look at Noah's upcoming independent film 'Deep Water.' Fan club members will receive a private link to the teaser trailer 24 hours before the global release.", 
-    tickets: false 
+    description: "Thank you to all fan club members who tuned in for the exclusive first look at Noah's upcoming independent film 'Deep Water.' The teaser trailer received an incredible response and we're thrilled by the excitement surrounding this project.", 
+    tickets: false,
+    passed: true 
   },
-  { title: "Private Screening — 'Mercy'", date: "April 22, 2026", location: "AMC Theatre, New York, NY", description: "Join Noah for an exclusive private screening of 'Mercy' followed by a live Q&A session. Limited seats available for fan club members.", tickets: true },
+  { 
+    title: "Private Screening — 'Mercy'", 
+    date: "April 22, 2026", 
+    location: "AMC Theatre, New York, NY", 
+    description: "Thank you to everyone who attended the exclusive private screening of 'Mercy' at AMC Theatre in New York. The live Q&A session with Noah was a memorable evening, and we're grateful to all the fan club members who made it so special.", 
+    tickets: false,
+    passed: true 
+  },
   { title: "Fan Club Appreciation Night", date: "May 10, 2026", location: "The Hollywood Roosevelt, Los Angeles, CA", description: "A night dedicated to Noah's most loyal fans. Enjoy cocktails, live entertainment, and special announcements about upcoming projects.", tickets: true },
   { 
     title: "Charity Gala for Ocean Conservation", 
